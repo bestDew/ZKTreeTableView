@@ -11,6 +11,7 @@
 		FD02FDF4213C5177003F0F56 /* YYFPSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD02FDF1213C5177003F0F56 /* YYFPSLabel.m */; };
 		FD399B5A213E611D0035983F /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B59213E611D0035983F /* MainViewController.m */; };
 		FD399B60213E66DC0035983F /* CustomCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B5F213E66DC0035983F /* CustomCell.m */; };
+		FD399B72213E8D560035983F /* Untitled.gif in Resources */ = {isa = PBXBuildFile; fileRef = FD399B71213E8D560035983F /* Untitled.gif */; };
 		FD62A6D621366CD000815DAA /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FD62A6D521366CD000815DAA /* AppDelegate.m */; };
 		FD62A6D921366CD000815DAA /* TreeListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD62A6D821366CD000815DAA /* TreeListViewController.m */; };
 		FD62A6DC21366CD000815DAA /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FD62A6DA21366CD000815DAA /* Main.storyboard */; };
@@ -35,6 +36,7 @@
 		FD399B59213E611D0035983F /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		FD399B5E213E66DC0035983F /* CustomCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomCell.h; sourceTree = "<group>"; };
 		FD399B5F213E66DC0035983F /* CustomCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomCell.m; sourceTree = "<group>"; };
+		FD399B71213E8D560035983F /* Untitled.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Untitled.gif; sourceTree = "<group>"; };
 		FD62A6D121366CD000815DAA /* ZKTreeTableView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZKTreeTableView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD62A6D421366CD000815DAA /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FD62A6D521366CD000815DAA /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -121,6 +123,7 @@
 				FD62A6E221366CD200815DAA /* Info.plist */,
 				FD62A6E321366CD200815DAA /* main.m */,
 				FD62A6F4213684AB00815DAA /* Resource.json */,
+				FD399B71213E8D560035983F /* Untitled.gif */,
 			);
 			path = ZKTreeTableView;
 			sourceTree = "<group>";
@@ -201,6 +204,7 @@
 				FD62A6F5213684AB00815DAA /* Resource.json in Resources */,
 				FD62A6DE21366CD200815DAA /* Assets.xcassets in Resources */,
 				FD62A6DC21366CD000815DAA /* Main.storyboard in Resources */,
+				FD399B72213E8D560035983F /* Untitled.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
