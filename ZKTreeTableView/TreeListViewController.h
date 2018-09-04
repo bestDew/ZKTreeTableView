@@ -7,9 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ZKTreeListView.h"
 
-@interface ViewController : UIViewController
+@interface TreeListViewController : UIViewController
 
+@property (nonatomic) ZKTreeListViewStyle treeStyle;
 
 @end
 
