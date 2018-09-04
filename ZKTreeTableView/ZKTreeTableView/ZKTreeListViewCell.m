@@ -140,7 +140,7 @@
     [self parentItem:pItem.parentItem mutArray:mutArray];
 }
 
-- (void)drawStructureLine
+- (void)addStructureLine
 {
     // 移除之前的结构线
     [self removeAllLineLayers];
@@ -156,7 +156,7 @@
     for (NSInteger i = 0; i < _treeItem.level; i++) {
         // 若 treeItem 父节点为叶节点，则该 level 下不绘制结构线
         if ([mutArray containsObject:@(i)]) continue;
-        
+
         CGFloat lineX = 0.f;
         
         if (i == 0) {
@@ -205,14 +205,14 @@
         _verticalLine = nil;
         [self.contentView.layer addSublayer:self.separator];
     }
-    [self drawStructureLine];
+    [self addStructureLine];
 }
 
 - (void)setTreeItem:(ZKTreeItem *)treeItem
 {
     _treeItem = treeItem;
     
-    [self drawStructureLine];
+    [self addStructureLine];
 }
 
 - (UIView *)containerView
