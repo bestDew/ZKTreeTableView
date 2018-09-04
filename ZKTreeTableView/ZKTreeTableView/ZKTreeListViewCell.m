@@ -140,7 +140,7 @@
     [self parentItem:pItem.parentItem mutArray:mutArray];
 }
 
-- (void)addStructureLine
+- (void)addStructureLines
 {
     // 移除之前的结构线
     [self removeAllLineLayers];
@@ -154,7 +154,7 @@
     CGFloat lineHeight = self.contentView.frame.size.height;
     
     for (NSInteger i = 0; i < _treeItem.level; i++) {
-        // 若 treeItem 父节点为叶节点，则该 level 下不绘制结构线
+        // 若 treeItem 父节点为叶节点，则该 level 下不添加结构线
         if ([mutArray containsObject:@(i)]) continue;
 
         CGFloat lineX = 0.f;
@@ -171,7 +171,7 @@
         if ((items.lastObject == _treeItem) && i == _treeItem.level - 1) {
             lineHeight = 28.f;
         }
-        // 绘制结构线
+        // 添加结构线
         ZKLayer *otherLine = [ZKLayer layer];
         otherLine.frame = CGRectMake(lineX, 0.f, 1.0, lineHeight);
         [self.contentView.layer addSublayer:otherLine];
@@ -205,14 +205,14 @@
         _verticalLine = nil;
         [self.contentView.layer addSublayer:self.separator];
     }
-    [self addStructureLine];
+    [self addStructureLines];
 }
 
 - (void)setTreeItem:(ZKTreeItem *)treeItem
 {
     _treeItem = treeItem;
     
-    [self addStructureLine];
+    [self addStructureLines];
 }
 
 - (UIView *)containerView
