@@ -30,9 +30,9 @@
     [self.view addSubview:self.listView];
     [self requestTreeData];
     
-//    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
-//    [fpsLabel sizeToFit];
-//    [self.view addSubview:fpsLabel];
+    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
+    [fpsLabel sizeToFit];
+    [self.view addSubview:fpsLabel];
     
     // 监听屏幕旋转
     [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
