@@ -24,11 +24,12 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    UIBarButtonItem *allExpandItem = [[UIBarButtonItem alloc] initWithTitle:@"全部展开" style:UIBarButtonItemStylePlain target:self action:@selector(allExpandItemClick)];
-    self.navigationItem.rightBarButtonItem = allExpandItem;
+    UIBarButtonItem *expandAllItem = [[UIBarButtonItem alloc] initWithTitle:@"全部展开" style:UIBarButtonItemStylePlain target:self action:@selector(expandAllNodes)];
+    UIBarButtonItem *appendDataItem = [[UIBarButtonItem alloc] initWithTitle:@"加载更多" style:UIBarButtonItemStylePlain target:self action:@selector(appendData)];
+    self.navigationItem.rightBarButtonItems = @[expandAllItem, appendDataItem];
     
     [self.view addSubview:self.listView];
-    [self requestTreeData];
+    [self requestTreeData:YES];
     
     YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
     [fpsLabel sizeToFit];
@@ -49,22 +50,22 @@
     
     if (_treeStyle == ZKTreeListViewStyleNone) return;
     
-    for (ZKTreeItem *item in _listView.items) {
+    for (ZKTreeNode *node in _listView.allNodes) {
         
-        CommentsModel *model = (CommentsModel *)item.data;
-        CGFloat itemHeight = [self itemHeightWithLevel:[model.level integerValue] content:model.content];
-        [item setValue:@(itemHeight) forKey:@"itemHeight"];
+        CommentsModel *model = (CommentsModel *)node.data;
+        CGFloat nodeHeight = [self nodeHeightWithLevel:[model.level integerValue] content:model.content];
+        [node setValue:@(nodeHeight) forKey:@"nodeHeight"];
     }
-    [_listView reloadData];
+    [_listView reloadData:_listView.allNodes];
 }
 
-- (void)requestTreeData
+- (void)requestTreeData:(BOOL)isRefresh
 {
     // 获取数据并创建树形结构
     NSError *error = nil;
     NSData *JSONData = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"Resource" ofType:@"json"]];
     NSArray *dataArray = [NSJSONSerialization JSONObjectWithData:JSONData options:NSJSONReadingAllowFragments error:&error];
-    NSMutableArray *items = @[].mutableCopy;
+    NSMutableArray *nodes = @[].mutableCopy;
     if (error) NSLog(@"%@", error);
     
     for (NSDictionary *data in dataArray) {
@@ -72,54 +73,57 @@
         CommentsModel *model = [CommentsModel modelWithDict:data];
         // 2.计算 cell 行高
         NSInteger level = [model.level integerValue];
-        CGFloat itemHeight = (_treeStyle == 0) ? 44.f : [self itemHeightWithLevel:level content:model.content];
-        // 3.创建 treeItem
-        ZKTreeItem *item = [[ZKTreeItem alloc] initWithID:[NSString stringWithFormat:@"%@", data[@"id"]]
+        CGFloat nodeHeight = (_treeStyle == 0) ? 44.f : [self nodeHeightWithLevel:level content:model.content];
+        // 3.创建 node
+        ZKTreeNode *node = [[ZKTreeNode alloc] initWithID:[NSString stringWithFormat:@"%@", data[@"id"]]
                                                  parentID:[NSString stringWithFormat:@"%@", data[@"pid"]]
                                                   orderNo:[NSString stringWithFormat:@"%@", data[@"order_no"]]
                                                     level:level
-                                               itemHeight:itemHeight
+                                               nodeHeight:nodeHeight
                                                      data:model];
-        [items addObject:item];
+        [nodes addObject:node];
     }
-    _listView.items = items;
-    [_listView reloadData];
+    isRefresh ? [_listView reloadData:nodes] : [_listView appendData:nodes];
 }
 
-- (void)allExpandItemClick
+- (void)expandAllNodes
 {
     static BOOL isExpand = YES;
-    [self.listView expandAllItems:isExpand];
+    [_listView expandAllNodes:isExpand];
     isExpand = !isExpand;
     
     if (_treeStyle == ZKTreeListViewStyleStructureLine) return;
     
-    NSArray *items = [_listView getShowItems];
-    for (NSInteger i = 0; i < items.count; i++) {
+    for (NSInteger i = 0; i < _listView.showNodes.count; i++) {
         @autoreleasepool {
-            ZKTreeItem *item = items[i];
+            ZKTreeNode *node = _listView.showNodes[i];
             NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
             CustomCell *cell = [_listView cellForRowAtIndexPath:indexPath];
-            CGFloat angle = (item.isExpand && item.childItems.count > 0) ? M_PI_2 : 0.f;
+            CGFloat angle = (node.isExpand && node.childNodes.count > 0) ? M_PI_2 : 0.f;
             [cell refreshArrowDirection:angle animated:YES];
         }
     }
 }
 
-#pragma mark -- ZKTreeListView Delgate
-- (void)treeListView:(ZKTreeListView *)listView didSelectRowAtIndexPath:(NSIndexPath *)indexPath withItem:(ZKTreeItem *)item
+- (void)appendData
 {
-    [listView expandItems:@[item] isExpand:!item.isExpand];
+    [self requestTreeData:NO];
+}
+
+#pragma mark -- ZKTreeListView Delgate
+- (void)treeListView:(ZKTreeListView *)listView didSelectRowAtIndexPath:(NSIndexPath *)indexPath withNode:(ZKTreeNode *)node
+{
+    [listView expandNodes:@[node] expand:!node.isExpand];
     
     if (_treeStyle == ZKTreeListViewStyleStructureLine) return;
     
-    CGFloat angle = (item.isExpand && item.childItems.count > 0) ? M_PI_2 : 0.f;
+    CGFloat angle = (node.isExpand && node.childNodes.count > 0) ? M_PI_2 : 0.f;
     CustomCell *cell = [listView cellForRowAtIndexPath:indexPath];
     [cell refreshArrowDirection:angle animated:YES];
 }
 
 #pragma mark -- Other
-- (CGFloat)itemHeightWithLevel:(NSInteger)level content:(NSString *)text
+- (CGFloat)nodeHeightWithLevel:(NSInteger)level content:(NSString *)text
 {
     CGFloat imgSize = (level == 0) ? 40.f : 30.f;
     CGFloat cellWidth = [_listView containerViewWidthWithLevel:level];

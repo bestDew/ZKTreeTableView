@@ -34,7 +34,7 @@
 {
     [super layoutSubviews];
     
-    CGFloat imgSize = (self.treeItem.level == 0) ? 40.f : 24.f;
+    CGFloat imgSize = (self.node.level == 0) ? 40.f : 24.f;
     
     _imgView.frame = CGRectMake(0.f, 16.f, imgSize, imgSize);
     _imgView.layer.cornerRadius = imgSize / 2;
@@ -43,11 +43,11 @@
     _contentLabel.layer.cornerRadius = 8.f;
 }
 
-- (void)setTreeItem:(ZKTreeItem *)treeItem
+- (void)setNode:(ZKTreeNode *)node
 {
-    [super setTreeItem:treeItem]; // 必须调用父类方法
+    [super setNode:node]; // 必须调用父类方法
     
-    CommentsModel *model = (CommentsModel *)treeItem.data;
+    CommentsModel *model = (CommentsModel *)node.data;
     
     self.nickNameLabel.text = model.nick_name;
     self.imgView.image = [UIImage imageNamed:model.image_name];

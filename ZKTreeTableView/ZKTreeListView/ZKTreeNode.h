@@ -1,8 +1,8 @@
 //
-//  ZKTreeItem.h
-//  ZKTreeTableView
+//  ZKTreeNode.h
+//  ZKTreeListViewDemo
 //
-//  Created by bestdew on 2018/8/29.
+//  Created by bestdew on 2018/9/5.
 //  Copyright © 2018年 bestdew. All rights reserved.
 //
 //                      d*##$.
@@ -44,36 +44,37 @@
 
 @import CoreGraphics.CGBase;
 
-@interface ZKTreeItem : NSObject
+@interface ZKTreeNode : NSObject
 
-@property (nonatomic, readonly, copy) NSString *ID;         // 唯一标识
-@property (nonatomic, readonly, copy) NSString *parentID;   // 父级节点唯一标识
-@property (nonatomic, readonly, copy) NSString *orderNo;    // 序号
+@property (nonatomic, readonly, copy) NSString *ID;          // 唯一标识
+@property (nonatomic, readonly, copy) NSString *parentID;    // 父级节点唯一标识
+@property (nonatomic, readonly, copy) NSString *orderNo;     // 序号
 
-@property (nonatomic, readonly, assign) CGFloat itemHeight; // cell的行高
-@property (nonatomic, readonly, strong) id data;            // 完整数据，可以是数据模型
+@property (nonatomic, readonly, assign) CGFloat nodeHeight;  // 节点高度，即为 cell 高度
+@property (nonatomic, readonly, strong) id data;             // 完整数据，可以是数据模型
 
-@property (nonatomic, assign) NSInteger level;              // 层级
-@property (nonatomic, assign) BOOL isExpand;                // 是否为展开状态
-@property (nonatomic, weak)   ZKTreeItem *parentItem;
-@property (nonatomic, strong) NSMutableArray<ZKTreeItem *> *childItems;
+@property (nonatomic, assign) NSInteger level;               // 层级
+@property (nonatomic, assign, getter=isExpand) BOOL expand;  // 是否为展开状态
+
+@property (nonatomic, weak)   ZKTreeNode *parentNode;        // 父节点
+@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *childNodes; // 子节点数组
 
 /**
  初始化方法
-
+ 
  @param ID 唯一标识
  @param pID 父级节点唯一标识
  @param orderNo 序号
  @param level 层级
  @param height cell的行高
  @param data 完整数据，可以是数据模型
- @return item实例
+ @return treeNode 实例对象
  */
 - (instancetype)initWithID:(NSString *)ID
                   parentID:(NSString *)pID
                    orderNo:(NSString *)orderNo
                      level:(NSInteger)level
-                itemHeight:(CGFloat)height
+                nodeHeight:(CGFloat)height
                       data:(id)data;
 
 /** 后台数据未返回 level 时，可使用此初始化方法 */

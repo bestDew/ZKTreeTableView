@@ -1,8 +1,8 @@
 //
 //  ZKTreeListView.h
-//  ZKTreeTableView
+//  ZKTreeListViewDemo
 //
-//  Created by bestdew on 2018/8/29.
+//  Created by bestdew on 2018/9/5.
 //  Copyright © 2018年 bestdew. All rights reserved.
 //
 //                      d*##$.
@@ -54,17 +54,20 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 
 @optional;
 /** 点击回调 */
-- (void)treeListView:(ZKTreeListView *)listView didSelectRowAtIndexPath:(NSIndexPath *)indexPath withItem:(ZKTreeItem *)item;
-/** 若实现此代理方法，则 cell 的高度根据代理方法返回的高度而定；若未实现，则默认读取 treeItem.itemHeight */
-- (CGFloat)treeListView:(ZKTreeListView *)listView heightForItem:(ZKTreeItem *)item;
+- (void)treeListView:(ZKTreeListView *)listView didSelectRowAtIndexPath:(NSIndexPath *)indexPath withNode:(ZKTreeNode *)node;
+/** 若实现此代理方法，则 cell 的高度根据代理方法返回的高度而定；若未实现，则默认读取 node.nodeHeight */
+- (CGFloat)treeListView:(ZKTreeListView *)listView heightForNode:(ZKTreeNode *)node;
 
 @end
 
 @interface ZKTreeListView : UIView
+
 /** 默认展开级数 */
 @property (nonatomic, assign) NSInteger defaultExpandLevel;
-/** 数据源 */
-@property (nonatomic, strong) NSArray<ZKTreeItem *> *items;
+/** 全部数据，包含已展示的数据和未展示的数据 */
+@property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *allNodes;
+/** 已展示的数据 */
+@property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *showNodes;
 /** 代理 */
 @property (nonatomic, weak) id<ZKTreeListViewDelegate> delegate;
 /** 风格 */
@@ -85,33 +88,24 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 /** 注册自定义cell，必须继承自<ZKTreeTableViewCell> */
 - (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier;
 
-/** 重新加载 */
-- (void)reloadData;
+/** 重新加载数据 */
+- (void)reloadData:(NSArray<ZKTreeNode *> *)nodes;
+/** 追加数据 */
+- (void)appendData:(NSArray<ZKTreeNode *> *)nodes;
 
 /** 全部展开/全部折叠 */
-- (void)expandAllItems:(BOOL)isExpand;
-
-/** 展开/折叠到多少层级 */
-- (void)expandItemWithLevel:(NSInteger)expandLevel;
-
-/** 展开/折叠一组 item */
-- (void)expandItems:(NSArray<ZKTreeItem *> *)items isExpand:(BOOL)isExpand;
-
-/** 获取当前显示的 items */
-- (NSArray<ZKTreeItem *> *)getShowItems;
-
-/** 获取所有的 Items */
-- (NSArray<ZKTreeItem *> *)getAllItems;
+- (void)expandAllNodes:(BOOL)isExpand;
+/** 全部展开/折叠到多少层级 */
+- (void)expandNodesWithLevel:(NSInteger)expandLevel;
+/** 展开/折叠一组 nodes */
+- (void)expandNodes:(NSArray<ZKTreeNode *> *)nodes expand:(BOOL)isExpand;
 
 /** 根据 level 返回相应的 containerView 宽度 */
 - (CGFloat)containerViewWidthWithLevel:(NSInteger)level;
-
 /** 获取 cell 在屏幕中的坐标值 */
 - (CGRect)rectInScreenForRowAtIndexPath:(NSIndexPath *)indexPath;
-
 /** 根据 cell 获取 indexPath */
 - (nullable NSIndexPath *)indexPathForCell:(ZKTreeListViewCell *)cell;
-
 /** 根据 indexPath 获取 cell */
 - (nullable __kindof ZKTreeListViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath;
 

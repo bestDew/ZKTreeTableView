@@ -64,16 +64,16 @@
 }
 
 #pragma mark -- Setter && Getter
-- (void)setTreeItem:(ZKTreeItem *)treeItem
+- (void)setNode:(ZKTreeNode *)node
 {
-    [super setTreeItem:treeItem];
-
-    CommentsModel *model = (CommentsModel *)treeItem.data;
+    [super setNode:node];
+    
+    CommentsModel *model = (CommentsModel *)node.data;
     _titleLabel.text = model.nick_name;
     
-    _arrowImgView.hidden = (treeItem.childItems.count <= 0);
+    _arrowImgView.hidden = (node.childNodes.count <= 0);
     
-    CGFloat angle = (treeItem.isExpand) ? M_PI_2 : 0.f;
+    CGFloat angle = (node.isExpand) ? M_PI_2 : 0.f;
     [self refreshArrowDirection:angle animated:NO];
 }
 
