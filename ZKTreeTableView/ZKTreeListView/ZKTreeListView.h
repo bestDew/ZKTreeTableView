@@ -92,6 +92,8 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 - (void)reloadData:(NSArray<ZKTreeNode *> *)nodes;
 /** 追加数据 */
 - (void)appendData:(NSArray<ZKTreeNode *> *)nodes;
+/** 插入数据 */
+- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndexPath:(NSIndexPath *)indexPath;
 
 /** 全部展开/全部折叠 */
 - (void)expandAllNodes:(BOOL)isExpand;

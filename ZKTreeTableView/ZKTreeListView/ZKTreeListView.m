@@ -114,6 +114,23 @@
     });
 }
 
+- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndexPath:(NSIndexPath *)indexPath
+{
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        // 1.查找当前 section 下的 管理者
+        ZKTreeManager *manager = self.managers[indexPath.section];
+        // 2.插入数据
+        [manager insertNodes:nodes atIndex:indexPath.row];
+        // 3.刷新界面
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [UIView setAnimationsEnabled:NO];
+            NSIndexSet *secIndexSet = [[NSIndexSet alloc] initWithIndex:indexPath.section];
+            [self.tableView reloadSections:secIndexSet withRowAnimation:UITableViewRowAnimationNone];
+            [UIView setAnimationsEnabled:YES];
+        });
+    });
+}
+
 - (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier
 {
     self.identifier = identifier;

@@ -47,18 +47,10 @@
 {
     BOOL _flag; // 判断是否需要计算等级的标识
 }
-@property (nonatomic, strong) NSDictionary *nodesMap;
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *topNodesMutArray;  // 根节点数组
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *allNodesMutArray;  // 全部节点数组
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *showNodesMutArray; // 已展示的节点数组
-@property (nonatomic, assign) NSInteger maxLevel;   // 最大等级
-@property (nonatomic, assign) NSInteger showLevel;  // 展开的最大等级
-
 @end
 
 @implementation ZKTreeManager
 
-#pragma mark -- 初始化
 - (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes andExpandLevel:(NSInteger)level
 {
     if (self = [super init]) {
@@ -69,7 +61,7 @@
         // 2. 建立父子关系，并得到顶级节点
         [self setupTopNodes];
         
-        // 3. 设置等级
+        // 3. 设置等级（如需）
         [self setupNodesLevel];
         
         // 4. 根据展开等级设置 showNodes
@@ -82,22 +74,24 @@
 - (void)setupNodesMapByNodes:(NSArray *)nodes
 {
     _flag = YES;
+    self.allNodes = nodes.mutableCopy;
+    
     NSMutableDictionary *nodesMap = @{}.mutableCopy;
     for (ZKTreeNode *node in nodes) {
         [nodesMap setObject:node forKey:node.ID];
         if (node.level != -1) _flag = NO;
     }
-    self.nodesMap = nodesMap.copy;
+    self.nodesMap = nodesMap.mutableCopy;
 }
 
 // 建立父子关系，并得到顶级节点
 - (void)setupTopNodes
 {
-    self.allNodesMutArray = self.nodesMap.allValues.mutableCopy;
-    
     // 建立父子关系
     NSMutableArray *topNodes = @[].mutableCopy;
-    for (ZKTreeNode *node in self.allNodesMutArray) {
+    self.minLevel = (self.allNodes.count > 0) ? self.allNodes[0].level : 0;
+    
+    for (ZKTreeNode *node in self.allNodes) {
         node.expand = NO;
         if ([node.parentID isKindOfClass:[NSString class]]) {
             ZKTreeNode *parentNode = self.nodesMap[node.parentID];
@@ -109,11 +103,16 @@
             }
         }
         if (!node.parentNode) [topNodes addObject:node];
-        if (!_flag) self.maxLevel = MAX(node.level, self.maxLevel);
+        if (!_flag) {
+            self.minLevel = MIN(node.level, self.minLevel);
+            self.maxLevel = MAX(node.level, self.maxLevel);
+        }
     }
     // 排序
-    self.topNodesMutArray = [topNodes sortedArrayUsingComparator:^NSComparisonResult(ZKTreeNode *node1, ZKTreeNode *node2) {
-        return [node1.orderNo compare:node2.orderNo];
+    self.topNodes = [topNodes sortedArrayUsingComparator:^NSComparisonResult(ZKTreeNode *node1, ZKTreeNode *node2) {
+        NSNumber *num1 = [NSNumber numberWithInteger:[node1.orderNo integerValue]];
+        NSNumber *num2 = [NSNumber numberWithInteger:[node2.orderNo integerValue]];
+        return [num1 compare:num2];
     }].mutableCopy;
 }
 
@@ -122,7 +121,7 @@
 {
     if (!_flag) return;
     
-    for (ZKTreeNode *node in self.allNodesMutArray) {
+    for (ZKTreeNode *node in self.allNodes) {
         NSInteger tempLevel = 0;
         ZKTreeNode *parentNode = node.parentNode;
         while (parentNode) {
@@ -130,6 +129,7 @@
             parentNode = parentNode.parentNode;
         }
         node.level = tempLevel;
+        self.minLevel = MIN(self.minLevel, tempLevel);
         self.maxLevel = MAX(self.maxLevel, tempLevel);
     }
 }
@@ -141,10 +141,10 @@
     self.showLevel = MIN(level, self.maxLevel);
     
     NSMutableArray *showNodes = @[].mutableCopy;
-    for (ZKTreeNode *node in self.topNodesMutArray) {
+    for (ZKTreeNode *node in self.topNodes) {
         [self addNode:node toShowNodes:showNodes andAllowShowLevel:self.showLevel];
     }
-    self.showNodesMutArray = showNodes;
+    self.showNodes = showNodes;
 }
 
 - (void)addNode:(ZKTreeNode *)node toShowNodes:(NSMutableArray *)showNodes andAllowShowLevel:(NSInteger)level
@@ -155,7 +155,9 @@
     
     node.expand = (node.level != level);
     node.childNodes = [node.childNodes sortedArrayUsingComparator:^NSComparisonResult(ZKTreeNode *node1, ZKTreeNode *node2) {
-        return [node1.orderNo compare:node2.orderNo];
+        NSNumber *num1 = [NSNumber numberWithInteger:[node1.orderNo integerValue]];
+        NSNumber *num2 = [NSNumber numberWithInteger:[node2.orderNo integerValue]];
+        return [num1 compare:num2];
     }].mutableCopy;
     
     for (ZKTreeNode *childNode in node.childNodes) {
@@ -181,10 +183,10 @@
         for (ZKTreeNode *tempNode in node.childNodes) {
             [self addNode:tempNode toTmpNodes:tempMutArray];
         }
-        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self.showNodesMutArray indexOfObject:node] + 1, tempMutArray.count)];
-        [self.showNodesMutArray insertObjects:tempMutArray atIndexes:indexSet];
+        NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange([self.showNodes indexOfObject:node] + 1, tempMutArray.count)];
+        [self.showNodes insertObjects:tempMutArray atIndexes:indexSet];
     } else { // 折叠
-        for (ZKTreeNode *tempNode in self.showNodesMutArray) {
+        for (ZKTreeNode *tempNode in self.showNodes) {
             BOOL isParent = NO;
             ZKTreeNode *parentNode = tempNode.parentNode;
             while (parentNode) {
@@ -196,7 +198,7 @@
             }
             if (isParent) [tempMutArray addObject:tempNode];
         }
-        [self.showNodesMutArray removeObjectsInArray:tempMutArray];
+        [self.showNodes removeObjectsInArray:tempMutArray];
     }
     
     return tempMutArray.count;
@@ -207,7 +209,9 @@
     [tmpNodes addObject:node];
     
     node.childNodes = [node.childNodes sortedArrayUsingComparator:^NSComparisonResult(ZKTreeNode *node1, ZKTreeNode *node2) {
-        return [node1.orderNo compare:node2.orderNo];
+        NSNumber *num1 = [NSNumber numberWithInteger:[node1.orderNo integerValue]];
+        NSNumber *num2 = [NSNumber numberWithInteger:[node2.orderNo integerValue]];
+        return [num1 compare:num2];
     }].mutableCopy;
     
     if (!node.isExpand) return;
@@ -226,8 +230,8 @@
     // 先一级一级折叠
     for (NSInteger level = self.maxLevel; level >= expandLevel; level--) {
         NSMutableArray *nodesArray = @[].mutableCopy;
-        for (NSInteger i = 0; i < self.showNodesMutArray.count; i++) {
-            ZKTreeNode *node = self.showNodesMutArray[i];
+        for (NSInteger i = 0; i < self.showNodes.count; i++) {
+            ZKTreeNode *node = self.showNodes[i];
             if (node.isExpand && node.level == level) {
                 [nodesArray addObject:node];
             }
@@ -242,8 +246,8 @@
     // 再一级一级展开
     for (NSInteger level = 0; level < expandLevel; level++) {
         NSMutableArray *nodesArray = @[].mutableCopy;
-        for (NSInteger i = 0; i < self.showNodesMutArray.count; i++) {
-            ZKTreeNode *node = self.showNodesMutArray[i];
+        for (NSInteger i = 0; i < self.showNodes.count; i++) {
+            ZKTreeNode *node = self.showNodes[i];
             if (!node.isExpand && node.level == level) {
                 [nodesArray addObject:node];
             }
@@ -256,20 +260,107 @@
     }
 }
 
+- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndex:(NSInteger)index
+{
+    // 1.查找目标位置节点
+    ZKTreeNode *node = self.showNodes[index];
+    // 2.构建一个临时管理者
+    ZKTreeManager *tempManager = [[ZKTreeManager alloc] initWithNodes:nodes andExpandLevel:NSIntegerMax];
+    // 3.校验插入层级合法性
+    if ((node.level + 1 < tempManager.minLevel) || ((node.level == tempManager.minLevel) && node.isExpand && (node.childNodes.count != 0)) || (tempManager.minLevel < node.level)) {
+        NSAssert(0, @"插入层级错误");
+    }
+    // 4.建立父子关系
+    NSInteger tempTopCount = tempManager.topNodes.count;
+    NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index + 1, tempManager.showNodes.count)];
+    if (tempManager.minLevel == 0) {
+        // 重置序号
+        NSInteger index = [self.topNodes indexOfObject:node];
+        for (NSInteger i = index + 1; i < self.topNodes.count; i++) {
+            ZKTreeNode *tempNode = self.topNodes[i];
+            [self node:tempNode resetOrderNo:(i + tempTopCount)];
+        }
+        for (NSInteger i = 0; i < tempTopCount; i++) {
+            ZKTreeNode *tempNode = tempManager.topNodes[i];
+            [self node:tempNode resetOrderNo:(i + index + 1)];
+        }
+        // 插入数据
+        [self.topNodes insertObjects:tempManager.topNodes atIndexes:indexSet];
+    } else {
+        if (node.level < tempManager.minLevel) {
+            node.expand = YES;
+            for (NSInteger i = 0; i < tempTopCount; i++) {
+                ZKTreeNode *tempNode = tempManager.topNodes[i];
+                tempNode.parentNode = node;
+                [self node:tempNode resetOrderNo:i];
+            }
+            for (NSInteger i = 0; i < node.childNodes.count; i++) {
+                ZKTreeNode *tempNode = node.childNodes[i];
+                [self node:tempNode resetOrderNo:(i + tempTopCount)];
+            }
+            NSIndexSet *tempIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, tempManager.topNodes.count)];
+            [node.childNodes insertObjects:tempManager.topNodes atIndexes:tempIndexSet];
+        } else {
+            NSInteger index = [node.parentNode.childNodes indexOfObject:node];
+            for (NSInteger i = index + 1; i < node.parentNode.childNodes.count; i++) {
+                ZKTreeNode *tempNode = node.parentNode.childNodes[i];
+                [self node:tempNode resetOrderNo:(i + tempTopCount)];
+            }
+            for (NSInteger i = 0; i < tempTopCount; i++) {
+                ZKTreeNode *tempNode = tempManager.topNodes[i];
+                tempNode.parentNode = node.parentNode;
+                [self node:tempNode resetOrderNo:(i + index + 1)];
+            }
+            NSIndexSet *tempIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(index + 1, tempManager.topNodes.count)];
+            [node.parentNode.childNodes insertObjects:tempManager.topNodes atIndexes:tempIndexSet];
+        }
+    }
+    // 5.重置最大最小值
+    self.minLevel = MIN(self.minLevel, tempManager.minLevel);
+    self.maxLevel = MAX(self.maxLevel, tempManager.maxLevel);
+    self.showLevel = MAX(self.showLevel, tempManager.showLevel);
+    // 6.数据合并
+    self.nodesMap = [self dictionaryByMerging:self.nodesMap with:tempManager.nodesMap];
+    [self.allNodes addObjectsFromArray:tempManager.allNodes];
+    [self.showNodes insertObjects:tempManager.showNodes atIndexes:indexSet];
+}
+
+- (void)node:(ZKTreeNode *)node resetOrderNo:(NSInteger)orderNo
+{
+    NSString *orderNoStr = [NSString stringWithFormat:@"%zd", orderNo];
+    [node setValue:orderNoStr forKey:@"orderNo"];
+}
+
+// 合并两个字典
+- (NSMutableDictionary *)dictionaryByMerging:(NSDictionary *)dict1 with:(NSDictionary *)dict2
+{
+    NSMutableDictionary *result = [NSMutableDictionary dictionaryWithDictionary:dict1];
+    NSMutableDictionary *resultTemp = [NSMutableDictionary dictionaryWithDictionary:dict1];
+    [resultTemp addEntriesFromDictionary:dict2];
+    [resultTemp enumerateKeysAndObjectsUsingBlock: ^(id key, id obj, BOOL *stop) {
+        if ([dict1 objectForKey:key]) {
+            if ([obj isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *newVal = [self dictionaryByMerging:[dict1 objectForKey:key] with:(NSDictionary *)obj];
+                [result setObject:newVal forKey:key];
+            } else {
+                [result setObject:obj forKey:key];
+            }
+        } else if([dict2 objectForKey:key]) {
+            if ([obj isKindOfClass:[NSDictionary class]]) {
+                NSDictionary *newVal = [self dictionaryByMerging:[dict2 objectForKey:key] with:(NSDictionary *)obj];
+                [result setObject:newVal forKey:key];
+            } else {
+                [result setObject:obj forKey:key];
+            }
+        }
+    }];
+    return [result mutableCopy];
+}
+
 // 根据 ID 获取 node
 - (ZKTreeNode *)getNodeWithNodeID:(NSString *)ID
 {
     return (ID ? self.nodesMap[ID] : nil);
-}
-
-- (NSArray<ZKTreeNode *> *)showNodes
-{
-    return self.showNodesMutArray;
-}
-
-- (NSArray<ZKTreeNode *> *)allNodes
-{
-    return self.allNodesMutArray;
 }
 
 @end

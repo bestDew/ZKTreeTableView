@@ -46,10 +46,20 @@
 
 @interface ZKTreeManager : NSObject
 
-/** 获取当前 manager 的可见节点 */
-@property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *showNodes;
-/** 获取当前 manager 的所有节点 */
-@property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *allNodes;
+/** key 为节点 ID，value为对应的 node */
+@property (nonatomic, strong) NSMutableDictionary *nodesMap;
+/** 所有可见节点 */
+@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *showNodes;
+/** 所有节点 */
+@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *allNodes;
+/** 所有根节点 */
+@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *topNodes;
+/** 最小等级 */
+@property (nonatomic, assign) NSInteger minLevel;
+/** 最大等级 */
+@property (nonatomic, assign) NSInteger maxLevel;
+/** 已展开的最大等级 */
+@property (nonatomic, assign) NSInteger showLevel;
 
 /**
  唯一初始化方法
@@ -67,6 +77,9 @@
 - (NSInteger)expandNode:(ZKTreeNode *)node expand:(BOOL)isExpand;
 /** 展开/折叠到多少层级 */
 - (void)expandNodesWithLevel:(NSInteger)expandLevel completed:(void(^)(NSArray *noExpandArray))noExpandCompleted andCompleted:(void(^)(NSArray *expandArray))expandCompleted;
+
+/** 在 showNodes 的 index 处插入一组节点 */
+- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndex:(NSInteger)index;
 
 /** 根据 ID 获取 node */
 - (ZKTreeNode *)getNodeWithNodeID:(NSString *)ID;
