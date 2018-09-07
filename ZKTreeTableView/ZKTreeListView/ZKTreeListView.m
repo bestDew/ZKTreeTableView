@@ -116,11 +116,6 @@
 
 - (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier
 {
-    if (cellClass) {
-        NSAssert(![cellClass isKindOfClass:[ZKTreeListViewCell class]],
-                 @"<cellClass>必须是<ZKTreeListViewCell>的子类");
-    }
-    
     self.identifier = identifier;
     [self.tableView registerClass:cellClass forCellReuseIdentifier:identifier];
 }
