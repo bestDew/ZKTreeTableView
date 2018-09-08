@@ -51,7 +51,7 @@
 
 @implementation ZKTreeManager
 
-- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes andExpandLevel:(NSInteger)level
+- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes expandLevel:(NSInteger)level
 {
     if (self = [super init]) {
         
@@ -265,7 +265,7 @@
     // 1.查找目标位置节点
     ZKTreeNode *node = self.showNodes[index];
     // 2.构建一个临时管理者
-    ZKTreeManager *tempManager = [[ZKTreeManager alloc] initWithNodes:nodes andExpandLevel:NSIntegerMax];
+    ZKTreeManager *tempManager = [[ZKTreeManager alloc] initWithNodes:nodes expandLevel:NSIntegerMax];
     // 3.校验插入层级合法性
     if ((node.level + 1 < tempManager.minLevel) || ((node.level == tempManager.minLevel) && node.isExpand && (node.childNodes.count != 0)) || (tempManager.minLevel < node.level)) {
         NSAssert(0, @"插入层级错误");
@@ -355,12 +355,6 @@
         }
     }];
     return [result mutableCopy];
-}
-
-// 根据 ID 获取 node
-- (ZKTreeNode *)getNodeWithNodeID:(NSString *)ID
-{
-    return (ID ? self.nodesMap[ID] : nil);
 }
 
 @end

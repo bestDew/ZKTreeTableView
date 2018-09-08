@@ -68,7 +68,7 @@
  @param level 折叠/展开等级，为 0 全部折叠，为 1 展开一级，以此类推，为 NSIntegerMax 全部展开
  @return treeManager 实例对象
  */
-- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes andExpandLevel:(NSInteger)level;
+- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes expandLevel:(NSInteger)level;
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
@@ -76,12 +76,11 @@
 - (NSInteger)expandNode:(ZKTreeNode *)node;
 - (NSInteger)expandNode:(ZKTreeNode *)node expand:(BOOL)isExpand;
 /** 展开/折叠到多少层级 */
-- (void)expandNodesWithLevel:(NSInteger)expandLevel completed:(void(^)(NSArray *noExpandArray))noExpandCompleted andCompleted:(void(^)(NSArray *expandArray))expandCompleted;
+- (void)expandNodesWithLevel:(NSInteger)expandLevel
+                   completed:(void(^)(NSArray *noExpandArray))noExpandCompleted
+                andCompleted:(void(^)(NSArray *expandArray))expandCompleted;
 
 /** 在 showNodes 的 index 处插入一组节点 */
 - (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndex:(NSInteger)index;
-
-/** 根据 ID 获取 node */
-- (ZKTreeNode *)getNodeWithNodeID:(NSString *)ID;
 
 @end

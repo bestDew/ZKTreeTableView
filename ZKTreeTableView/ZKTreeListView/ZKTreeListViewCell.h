@@ -47,7 +47,7 @@
 
 /** 内容容器，子类添加子控件需添加在内容容器上 */
 @property (nonatomic, strong) UIView *containerView;
-/** 子类中重写 -setTreeItem: 方法，通过treeItem.data进行赋值处理 */
+/** 子类中重写 -setTreeItem: 方法，通过 node.data 进行赋值处理 */
 @property (nonatomic, strong) ZKTreeNode *node;
 
 @end

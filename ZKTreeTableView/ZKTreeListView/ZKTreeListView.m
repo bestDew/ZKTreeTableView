@@ -94,19 +94,13 @@
 - (void)reloadData:(NSArray<ZKTreeNode *> *)nodes
 {
     [self.managers removeAllObjects];
-    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:nodes andExpandLevel:_defaultExpandLevel];
-        [self.managers addObject:manager];
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
-        });
-    });
+    [self appendData:nodes];
 }
 
 - (void)appendData:(NSArray<ZKTreeNode *> *)nodes
 {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:nodes andExpandLevel:_defaultExpandLevel];
+        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:nodes expandLevel:_defaultExpandLevel];
         [self.managers addObject:manager];
         dispatch_async(dispatch_get_main_queue(), ^{
             [self.tableView reloadData];
@@ -117,7 +111,7 @@
 - (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndexPath:(NSIndexPath *)indexPath
 {
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        // 1.查找当前 section 下的 管理者
+        // 1.查找当前 section 下的管理者
         ZKTreeManager *manager = self.managers[indexPath.section];
         // 2.插入数据
         [manager insertNodes:nodes atIndex:indexPath.row];

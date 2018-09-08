@@ -59,7 +59,7 @@
 
 @interface ZKTreeListViewCell ()
 
-@property (nonatomic, assign) CGFloat indenWidth; // 缩进宽度，默认为7.f
+@property (nonatomic, assign) CGFloat indenWidth; // 缩进宽度，默认为8.f
 @property (nonatomic, strong) CALayer *horizontalLine;
 @property (nonatomic, strong) CALayer *verticalLine;
 @property (nonatomic, strong) CALayer *separator;
