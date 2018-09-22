@@ -12,7 +12,6 @@
 		FD02FDF4213C5177003F0F56 /* YYFPSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD02FDF1213C5177003F0F56 /* YYFPSLabel.m */; };
 		FD399B5A213E611D0035983F /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B59213E611D0035983F /* MainViewController.m */; };
 		FD399B60213E66DC0035983F /* CustomCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B5F213E66DC0035983F /* CustomCell.m */; };
-		FD399B72213E8D560035983F /* Untitled.gif in Resources */ = {isa = PBXBuildFile; fileRef = FD399B71213E8D560035983F /* Untitled.gif */; };
 		FD59B371213FB6C1000349F9 /* ZKTreeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B369213FB6C1000349F9 /* ZKTreeManager.m */; };
 		FD59B372213FB6C1000349F9 /* ZKTreeListView.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B36E213FB6C1000349F9 /* ZKTreeListView.m */; };
 		FD59B373213FB6C1000349F9 /* ZKTreeListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B36F213FB6C1000349F9 /* ZKTreeListViewCell.m */; };
@@ -25,6 +24,7 @@
 		FD62A6E421366CD200815DAA /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FD62A6E321366CD200815DAA /* main.m */; };
 		FD62A6F321367C6300815DAA /* CommentsModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD62A6F221367C6300815DAA /* CommentsModel.m */; };
 		FD62A6F5213684AB00815DAA /* Resource.json in Resources */ = {isa = PBXBuildFile; fileRef = FD62A6F4213684AB00815DAA /* Resource.json */; };
+		FD7954382156855800D22B30 /* Untitled.gif in Resources */ = {isa = PBXBuildFile; fileRef = FD7954372156855800D22B30 /* Untitled.gif */; };
 		FDC697E72137F9A60037EF3B /* CommentsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC697E62137F9A60037EF3B /* CommentsCell.m */; };
 /* End PBXBuildFile section */
 
@@ -40,7 +40,6 @@
 		FD399B59213E611D0035983F /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
 		FD399B5E213E66DC0035983F /* CustomCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomCell.h; sourceTree = "<group>"; };
 		FD399B5F213E66DC0035983F /* CustomCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomCell.m; sourceTree = "<group>"; };
-		FD399B71213E8D560035983F /* Untitled.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Untitled.gif; sourceTree = "<group>"; };
 		FD59B369213FB6C1000349F9 /* ZKTreeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZKTreeManager.m; sourceTree = "<group>"; };
 		FD59B36A213FB6C1000349F9 /* ZKTreeListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZKTreeListView.h; sourceTree = "<group>"; };
 		FD59B36B213FB6C1000349F9 /* ZKTreeNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZKTreeNode.h; sourceTree = "<group>"; };
@@ -62,6 +61,7 @@
 		FD62A6F121367C6300815DAA /* CommentsModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommentsModel.h; sourceTree = "<group>"; };
 		FD62A6F221367C6300815DAA /* CommentsModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommentsModel.m; sourceTree = "<group>"; };
 		FD62A6F4213684AB00815DAA /* Resource.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Resource.json; sourceTree = "<group>"; };
+		FD7954372156855800D22B30 /* Untitled.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Untitled.gif; sourceTree = "<group>"; };
 		FDC697E52137F9A60037EF3B /* CommentsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommentsCell.h; sourceTree = "<group>"; };
 		FDC697E62137F9A60037EF3B /* CommentsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommentsCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -161,8 +161,8 @@
 				FD62A6DF21366CD200815DAA /* LaunchScreen.storyboard */,
 				FD62A6E221366CD200815DAA /* Info.plist */,
 				FD62A6E321366CD200815DAA /* main.m */,
+				FD7954372156855800D22B30 /* Untitled.gif */,
 				FD62A6F4213684AB00815DAA /* Resource.json */,
-				FD399B71213E8D560035983F /* Untitled.gif */,
 			);
 			path = ZKTreeTableView;
 			sourceTree = "<group>";
@@ -230,7 +230,7 @@
 				FD62A6F5213684AB00815DAA /* Resource.json in Resources */,
 				FD62A6DE21366CD200815DAA /* Assets.xcassets in Resources */,
 				FD62A6DC21366CD000815DAA /* Main.storyboard in Resources */,
-				FD399B72213E8D560035983F /* Untitled.gif in Resources */,
+				FD7954382156855800D22B30 /* Untitled.gif in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -242,15 +242,11 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
 				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"$(DERIVED_FILE_DIR)/Pods-ZKTreeTableView-checkManifestLockResult.txt",
 			);
@@ -264,15 +260,11 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-ZKTreeTableView/Pods-ZKTreeTableView-resources.sh",
 				"${PODS_ROOT}/MJRefresh/MJRefresh/MJRefresh.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/MJRefresh.bundle",
 			);
