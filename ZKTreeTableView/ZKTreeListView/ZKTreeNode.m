@@ -44,39 +44,64 @@
 
 @implementation ZKTreeNode
 
-- (instancetype)initWithID:(NSString *)ID
-                  parentID:(NSString *)pID
-                   orderNo:(NSString *)orderNo
-                      data:(id)data
-{
-    return [self initWithID:ID
-                   parentID:pID
-                    orderNo:orderNo
-                      level:-1
-                 nodeHeight:0.f
-                       data:data];
-}
-
-- (instancetype)initWithID:(NSString *)ID
-                  parentID:(NSString *)pID
-                   orderNo:(NSString *)orderNo
-                     level:(NSInteger)level
-                nodeHeight:(CGFloat)height
-                      data:(id)data
+- (instancetype)initWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(id)data
 {
     if (self = [super init]) {
-        // 赋值
+        
         _ID = ID;
         _parentID = pID;
-        _orderNo = orderNo;
-        _level = level;
-        _nodeHeight = (height <= 0.f) ? 44.f : height;
+        _order = order;
         _data = data;
-        // 默认值
+        _level = -1;
         _expand = NO;
+        _rowHeight = -1.f;
+        _pageIndex = 1;
+        _childNodesCount = -1;
+        _parentNode = nil;
         _childNodes = @[].mutableCopy;
     }
     return self;
+}
+
++ (instancetype)nodeWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(id)data
+{
+    return [[self alloc] initWithID:ID parentID:pID sortOrder:order data:data];
+}
+
+- (BOOL)isEqualToNode:(ZKTreeNode *)node
+{
+    if (!node) return NO;
+    
+    return [self.ID isEqualToString:node.ID];
+}
+
+- (BOOL)isEqual:(id)object
+{
+    if (self == object) return YES;
+    if (![object isKindOfClass:[ZKTreeNode class]]) {
+        return NO;
+    }
+    return [self isEqualToNode:(ZKTreeNode *)object];
+}
+
+- (BOOL)isTail
+{
+    return [self.ID hasPrefix:@"node_tail_"];
+}
+
+- (void)setLevel:(NSInteger)level
+{
+    _level = MAX(level, 0);
+}
+
+- (void)setRowHeight:(CGFloat)rowHeight
+{
+    _rowHeight = MAX(rowHeight, 0);
+}
+
+- (void)setChildNodesCount:(NSInteger)childNodesCount
+{
+    _childNodesCount = MAX(childNodesCount, 0);
 }
 
 @end

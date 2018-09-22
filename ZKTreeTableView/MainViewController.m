@@ -47,7 +47,7 @@
 - (void)buttonAction:(UIButton *)button
 {
     TreeListViewController *treeListVC = [[TreeListViewController alloc] init];
-    treeListVC.treeStyle = button.tag - 10;
+    treeListVC.style = button.tag - 10;
     [self.navigationController pushViewController:treeListVC animated:YES];
 }
 

@@ -46,44 +46,37 @@
 
 @interface ZKTreeNode : NSObject
 
-@property (nonatomic, readonly, copy) NSString *ID;          // 唯一标识
-@property (nonatomic, readonly, copy) NSString *parentID;    // 父级节点唯一标识
-@property (nonatomic, readonly, copy) NSString *orderNo;     // 序号
+@property (nonatomic, readonly, copy) NSString *ID;        // 节点唯一标识
+@property (nonatomic, readonly, copy) NSString *parentID;  // 父节点唯一标识
+@property (nonatomic, readonly, assign) NSInteger order;   // 节点在其父节点的子节点数组中的排序依据
+@property (nonatomic, readonly, strong) id data;           // 节点完整数据，可以是数据模型
 
-@property (nonatomic, readonly, assign) CGFloat nodeHeight;  // 节点高度，即为 cell 高度
-@property (nonatomic, readonly, strong) id data;             // 完整数据，可以是数据模型
+@property (nonatomic, assign) NSInteger level;              // 节点所处层级（0，1，2...）
+@property (nonatomic, assign) CGFloat rowHeight;            // 行高
+@property (nonatomic, assign, getter=isExpand) BOOL expand; // 节点展开状态（YES：展开，NO：折叠）
 
-@property (nonatomic, assign) NSInteger level;               // 层级
-@property (nonatomic, assign, getter=isExpand) BOOL expand;  // 是否为展开状态
+@property (nonatomic, assign) NSInteger childNodesCount;    // 子节点总数（用于分页）
+@property (nonatomic, assign) NSInteger pageIndex;          // 分页页码（默认为1）
 
-@property (nonatomic, weak)   ZKTreeNode *parentNode;        // 父节点
+@property (nonatomic, weak)   ZKTreeNode *parentNode; // 父节点
 @property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *childNodes; // 子节点数组
 
-/**
- 初始化方法
- 
- @param ID 唯一标识
- @param pID 父级节点唯一标识
- @param orderNo 序号
- @param level 层级
- @param height cell的行高
- @param data 完整数据，可以是数据模型
- @return treeNode 实例对象
- */
+/** 快捷初始化 */
 - (instancetype)initWithID:(NSString *)ID
                   parentID:(NSString *)pID
-                   orderNo:(NSString *)orderNo
-                     level:(NSInteger)level
-                nodeHeight:(CGFloat)height
+                 sortOrder:(NSInteger)order
                       data:(id)data;
 
-/** 后台数据未返回 level 时，可使用此初始化方法 */
-- (instancetype)initWithID:(NSString *)ID
++ (instancetype)nodeWithID:(NSString *)ID
                   parentID:(NSString *)pID
-                   orderNo:(NSString *)orderNo
+                 sortOrder:(NSInteger)order
                       data:(id)data;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
+
+/** 判断两个节点是否相同（⚠️仅比较节点 ID ）*/
+- (BOOL)isEqualToNode:(ZKTreeNode *)node;
+- (BOOL)isTail;
 
 @end

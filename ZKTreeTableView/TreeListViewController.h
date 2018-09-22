@@ -11,7 +11,7 @@
 
 @interface TreeListViewController : UIViewController
 
-@property (nonatomic) ZKTreeListViewStyle treeStyle;
+@property (nonatomic) ZKTreeListViewStyle style;
 
 @end
 

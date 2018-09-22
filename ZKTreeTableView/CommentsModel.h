@@ -10,14 +10,14 @@
 
 @interface CommentsModel : NSObject
 
-@property (nonatomic, readonly, copy)   NSString *image_name; // 头像
-@property (nonatomic, readonly, copy)   NSString *nick_name;  // 昵称
-@property (nonatomic, readonly, copy)   NSString *location;   // 地理位置
-@property (nonatomic, readonly, copy)   NSString *phoneBrand; // 手机品牌
-@property (nonatomic, readonly, copy)   NSString *content;    // 评论内容
-@property (nonatomic, readonly, strong) NSNumber *likeCount;  // 点赞数
-@property (nonatomic, readonly, copy)   NSString *time;       // 评论时间
-@property (nonatomic, readonly, strong) NSNumber *level;      // 层级
+@property (nonatomic, readonly, strong) NSNumber *ID;           // 节点ID
+@property (nonatomic, readonly, strong) NSNumber *pid;          // 父节点ID
+@property (nonatomic, readonly, strong) NSNumber *level;        // 层级
+@property (nonatomic, readonly, copy)   NSString *image_name;   // 头像
+@property (nonatomic, readonly, copy)   NSString *nick_name;    // 昵称
+@property (nonatomic, readonly, copy)   NSString *content;      // 评论内容
+@property (nonatomic, readonly, strong) NSNumber *order_no;     // 序号
+@property (nonatomic, readonly, strong) NSNumber *childs_count; // 子节点总数
 
 + (instancetype)modelWithDict:(NSDictionary *)dict;
 

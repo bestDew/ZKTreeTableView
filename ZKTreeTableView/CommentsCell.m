@@ -23,9 +23,9 @@
 {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         
-        [self.containerView addSubview:self.imgView];
-        [self.containerView addSubview:self.nickNameLabel];
-        [self.containerView addSubview:self.contentLabel];
+        [self.view addSubview:self.imgView];
+        [self.view addSubview:self.nickNameLabel];
+        [self.view addSubview:self.contentLabel];
     }
     return self;
 }
@@ -34,12 +34,22 @@
 {
     [super layoutSubviews];
     
-    CGFloat imgSize = (self.node.level == 0) ? 40.f : 24.f;
+    CGFloat imgX = 0.f, imgSize = 0.f;
+    if (self.node.level == 0) {
+        imgX = 16.f;
+        imgSize = 40.f;
+    } else if (self.node.level == 1) {
+        imgX = 12.f;
+        imgSize = 24.f;
+    } else {
+        imgX = 8.f;
+        imgSize = 24.f;
+    }
     
-    _imgView.frame = CGRectMake(0.f, 16.f, imgSize, imgSize);
+    _imgView.frame = CGRectMake(imgX, 16.f, imgSize, imgSize);
     _imgView.layer.cornerRadius = imgSize / 2;
-    _nickNameLabel.frame = CGRectMake(imgSize + 12.f, 20.f, self.containerView.frame.size.width - imgSize - 28.f, 20.f);
-    _contentLabel.frame = CGRectMake(imgSize + 4.f, CGRectGetMaxY(_nickNameLabel.frame) + 4.f, self.containerView.frame.size.width - CGRectGetMaxX(_imgView.frame) - 20.f, self.containerView.frame.size.height - CGRectGetMaxY(_nickNameLabel.frame) - 4.f);
+    _nickNameLabel.frame = CGRectMake(imgX + imgSize + 12.f, 20.f, self.view.frame.size.width - imgX - imgSize - 28.f, 20.f);
+    _contentLabel.frame = CGRectMake(imgX + imgSize + 4.f, CGRectGetMaxY(_nickNameLabel.frame) + 4.f, self.view.frame.size.width - imgX - imgSize - 20.f, self.view.frame.size.height - CGRectGetMaxY(_nickNameLabel.frame) - 4.f);
     _contentLabel.layer.cornerRadius = 8.f;
 }
 

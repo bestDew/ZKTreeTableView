@@ -44,9 +44,9 @@
 #import "ZKTreeManager.h"
 
 @interface ZKTreeListView () <UITableViewDelegate, UITableViewDataSource>
-
-@property (nonatomic, copy) NSString *identifier;
-@property (nonatomic, strong) UITableView *tableView;
+{
+    dispatch_semaphore_t _lock;
+}
 @property (nonatomic, strong) NSMutableArray<ZKTreeManager *> *managers;
 
 @end
@@ -61,18 +61,21 @@
 
 - (instancetype)initWithFrame:(CGRect)frame
 {
-    return [self initWithFrame:frame style:ZKTreeListViewStyleNone];;
+    return [self initWithFrame:frame style:ZKTreeListViewStyleNone];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(ZKTreeListViewStyle)style
 {
     if (self = [super initWithFrame:frame]) {
-        self.frame = frame;
-        self.autoExpand = YES;
-        self.showExpandAnimation = YES;
-        self.defaultExpandLevel = 0;
-        self.style = style ? style : ZKTreeListViewStyleNone;
-        [self addSubview:self.tableView];
+        
+        _style = style;
+        _autoExpand = YES;
+        _showAnimation = YES;
+        _lock = dispatch_semaphore_create(1);
+
+        self.expandLevel = 0;
+        
+        [self addTableView];
     }
     return self;
 }
@@ -87,104 +90,186 @@
 {
     [super layoutSubviews];
     
-    self.tableView.frame = self.bounds;
+    _tableView.frame = self.bounds;
 }
 
-#pragma mark -- Public Method
-- (void)reloadData:(NSArray<ZKTreeNode *> *)nodes
+#pragma -- Load Data
+- (void)loadNodes:(NSArray<ZKTreeNode *> *)nodes
 {
+    // 1.先清空原始数据
     [self.managers removeAllObjects];
-    [self appendData:nodes];
+    // 2.再重新加载
+    [self appendNodes:nodes];
 }
 
-- (void)appendData:(NSArray<ZKTreeNode *> *)nodes
+- (void)appendNodes:(NSArray<ZKTreeNode *> *)nodes
 {
+    if (nodes == nil) return;
+    
+    // 1.数据去重
+    NSMutableArray *mutNodes = nodes.mutableCopy;
+    for (ZKTreeManager *tempManager in self.managers) {
+        for (ZKTreeNode *tempNode in tempManager.allNodes) {
+            if ([nodes containsObject:tempNode]) {
+                [mutNodes removeObject:tempNode];
+            }
+        }
+    }
+    
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:nodes expandLevel:_defaultExpandLevel];
+        dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+        // 2.构建管理者
+        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:mutNodes minLevel:0];
+        // 3.拼接节点
+        //[self insertShowMoreNodeForManager:manager];
         [self.managers addObject:manager];
+        dispatch_semaphore_signal(_lock);
+        // 4.刷新界面
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self.tableView reloadData];
+            [_tableView reloadData];
         });
     });
 }
 
-- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndexPath:(NSIndexPath *)indexPath
+- (void)reloadNodes:(NSArray<ZKTreeNode *> *)nodes
 {
+    if (nodes.count <= 0) return;
+    
+    for (ZKTreeManager *manager in self.managers) {
+        NSMutableArray<NSIndexPath *> *tempMutArray = @[].mutableCopy;
+        for (ZKTreeNode *node in nodes) {
+            if (![manager.showNodes containsObject:node]) continue;
+            NSInteger index = [manager.showNodes indexOfObject:node];
+            NSInteger section = [self.managers indexOfObject:manager];
+            NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:section];
+            [tempMutArray addObject:indexPath];
+        }
+        if (tempMutArray.count <= 0) continue;
+        [_tableView reloadRowsAtIndexPaths:tempMutArray withRowAnimation:UITableViewRowAnimationNone];
+    }
+}
+
+- (void)appendChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node
+{
+    if (nodes.count <= 0) return;
+    
+    __block NSMutableArray *mutNodes = nodes.mutableCopy;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        // 1.查找当前 section 下的管理者
-        ZKTreeManager *manager = self.managers[indexPath.section];
+        dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+        // 0.查找当前 section 下的 管理者
+        ZKTreeManager *manager = nil;
+        if (node == nil) { // 在根节点插入
+            manager = [self.managers lastObject];
+        } else {
+            for (ZKTreeManager *tempManager in self.managers) {
+                if ([tempManager getNodeByID:node.ID]) {
+                    manager = tempManager;
+                    break;
+                }
+            }
+            NSAssert(manager, @"当前树结构中未找到目标node");
+        }
+        // 1.数据去重
+        for (ZKTreeNode *tempNode in node.childNodes) {
+            if ([nodes containsObject:tempNode]) {
+                [mutNodes removeObject:tempNode];
+            }
+        }
         // 2.插入数据
-        [manager insertNodes:nodes atIndex:indexPath.row];
+        [manager appendChildNodes:mutNodes forNode:node];
         // 3.刷新界面
+        NSInteger section = [self.managers indexOfObject:manager];
+        dispatch_semaphore_signal(_lock);
         dispatch_async(dispatch_get_main_queue(), ^{
-            [UIView setAnimationsEnabled:NO];
-            NSIndexSet *secIndexSet = [[NSIndexSet alloc] initWithIndex:indexPath.section];
-            [self.tableView reloadSections:secIndexSet withRowAnimation:UITableViewRowAnimationNone];
-            [UIView setAnimationsEnabled:YES];
+            [self reloadSection:section];
         });
     });
 }
 
-- (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier
+- (void)deleteNode:(ZKTreeNode *)node
 {
-    self.identifier = identifier;
-    [self.tableView registerClass:cellClass forCellReuseIdentifier:identifier];
+    if (node == nil) return;
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+        // 1.查找当前 section 下的 管理者
+        ZKTreeManager *manager = nil;
+        for (ZKTreeManager *tempManager in self.managers) {
+            if ([tempManager getNodeByID:node.ID]) {
+                manager = tempManager;
+                break;
+            }
+        }
+        NSAssert(manager, @"当前树结构中未找到目标node");
+        // 2.删除节点
+        [manager deleteNode:node];
+        //[self insertShowMoreNodeForManager:manager];
+        // 3.刷新界面
+        NSInteger section = [self.managers indexOfObject:manager];
+        dispatch_semaphore_signal(_lock);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self reloadSection:section];
+        });
+    });
 }
 
-- (void)expandAllNodes:(BOOL)isExpand
-{
-    [self expandNodesWithLevel:(isExpand ? NSIntegerMax : 0)];
-}
-
-- (void)expandNodesWithLevel:(NSInteger)expandLevel
+#pragma mark -- Expand
+- (void)expandAllNodesWithLevel:(NSInteger)expandLevel
 {
     __weak typeof(self) weakSelf = self;
     for (ZKTreeManager *manager in self.managers) {
         NSInteger section = [self.managers indexOfObject:manager];
-        [manager expandNodesWithLevel:expandLevel completed:^(NSArray *noExpandArray) {
+        [manager expandAllNodesWithLevel:expandLevel noExpandCompleted:^(NSArray<ZKTreeNode *> * _Nonnull noExpandArray) {
             [weakSelf tableView:weakSelf.tableView didSelectNodes:noExpandArray withSection:section expand:NO];
-        } andCompleted:^(NSArray *expandArray) {
+        } expandCompleted:^(NSArray<ZKTreeNode *> * _Nonnull expandArray) {
             [weakSelf tableView:weakSelf.tableView didSelectNodes:expandArray withSection:section expand:YES];
         }];
     }
 }
 
-- (void)expandNodes:(NSArray<ZKTreeNode *> *)nodes expand:(BOOL)isExpand
+- (void)expandNodes:(NSArray<ZKTreeNode *> *)nodes withExpand:(BOOL)isExpand
 {
-    for (ZKTreeNode *node in nodes) {
-        for (ZKTreeManager *manager in self.managers) {
+    for (ZKTreeManager *manager in self.managers) {
+        NSMutableArray *tempMutArray = @[].mutableCopy;
+        for (ZKTreeNode *node in nodes) {
             if (![manager.showNodes containsObject:node]) continue;
-            NSInteger section = [self.managers indexOfObject:manager];
-            [self tableView:_tableView didSelectNodes:@[node] withSection:section expand:isExpand];
+            [tempMutArray addObject:node];
         }
+        if (tempMutArray.count <= 0) continue;
+        NSInteger section = [self.managers indexOfObject:manager];
+        [self tableView:_tableView didSelectNodes:tempMutArray withSection:section expand:isExpand];
     }
 }
 
-- (CGFloat)containerViewWidthWithLevel:(NSInteger)level
+#pragma mark -- Other
+- (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier
 {
-    CGFloat indentationWith = 0.f;
-    if (level <= 0) {
-        indentationWith = 16.f;
-    } else if (level == 1) {
-        indentationWith = 48.f;
-    } else {
-        indentationWith = 68.f + (level - 2) * 20.f;
-    }
-    return self.bounds.size.width - indentationWith;
-}
-
-- (CGRect)rectInScreenForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    UIWindow *keyWindow = [UIApplication sharedApplication].keyWindow;
-    CGRect rectInTableView = [_tableView rectForRowAtIndexPath:indexPath];
-    CGRect rectInScreen = [self convertRect:rectInTableView toView:keyWindow];
+    BOOL flag = [cellClass isSubclassOfClass:[ZKTreeListViewCell class]];
+    NSAssert(flag, @"cellClass必须继承<ZKTreeListViewCell>");
     
-    return rectInScreen;
+    [_tableView registerClass:cellClass forCellReuseIdentifier:identifier];
 }
 
-- (NSIndexPath *)indexPathForCell:(ZKTreeListViewCell *)cell
+- (__kindof ZKTreeListViewCell *)dequeueReusableCellWithIdentifier:(NSString *)identifier forIndexPath:(NSIndexPath *)indexPath
 {
-    return [_tableView indexPathForCell:cell];
+    return [_tableView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+}
+
+- (__kindof ZKTreeListViewCell *)cellForNode:(ZKTreeNode *)node
+{
+    if (node == nil) return nil;
+    
+    for (ZKTreeManager *manager in self.managers) {
+        if (![manager.showNodes containsObject:node]) continue;
+        
+        NSInteger section = [self.managers indexOfObject:manager];
+        NSInteger row = [manager.showNodes indexOfObject:node];
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
+        
+        return [_tableView cellForRowAtIndexPath:indexPath];
+    }
+    
+    return nil;
 }
 
 - (__kindof ZKTreeListViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -192,9 +277,17 @@
     return [_tableView cellForRowAtIndexPath:indexPath];
 }
 
-- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+- (CGFloat)indentationWidthWithLevel:(NSInteger)level
 {
-    [_tableView scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+    CGFloat indentationWith = 0.f;
+    if (level <= 0) {
+        indentationWith = 0.f;
+    } else if (level == 1) {
+        indentationWith = 36.f;
+    } else {
+        indentationWith = 60.f + (level - 2) * 20.f;
+    }
+    return indentationWith;
 }
 
 #pragma mark -- Private Method
@@ -206,12 +299,12 @@
     for (ZKTreeNode *node in nodes) {
         
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:[tempMutArray indexOfObject:node] inSection:section];
-        NSInteger updateNum = [self.managers[section] expandNode:node];
+        NSInteger updateNum = [self.managers[section] expandNode:node expand:isExpand];
         NSArray *tmpArray = [self getUpdateIndexPathsWithCurrentIndexPath:indexPath andUpdateNum:updateNum];
         [updateIndexPaths addObjectsFromArray:tmpArray];
     }
     
-    if (self.isShowExpandAnimation) {
+    if (self.isShowAnimation) {
         if (isExpand) {
             [tableView insertRowsAtIndexPaths:updateIndexPaths withRowAnimation:UITableViewRowAnimationAutomatic];
         } else {
@@ -229,30 +322,63 @@
         NSIndexPath *tmpIndexPath = [NSIndexPath indexPathForRow:(indexPath.row + 1 + i) inSection:indexPath.section];
         [tmpIndexPaths addObject:tmpIndexPath];
     }
-    
     return tmpIndexPaths;
 }
 
+- (void)reloadSection:(NSInteger)section
+{
+    [UIView setAnimationsEnabled:NO];
+    NSIndexSet *secIndexSet = [[NSIndexSet alloc] initWithIndex:section];
+    [_tableView reloadSections:secIndexSet withRowAnimation:UITableViewRowAnimationNone];
+    [UIView setAnimationsEnabled:YES];
+}
+
+- (void)addTableView
+{
+    _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+    _tableView.delegate = self;
+    _tableView.dataSource = self;
+    _tableView.estimatedRowHeight = 0;
+    _tableView.estimatedSectionHeaderHeight = 0;
+    _tableView.estimatedSectionFooterHeight = 0;
+    if (_style == ZKTreeListViewStyleNone) {
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
+    } else {
+        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+    }
+    [_tableView registerClass:[ZKTailCell class] forCellReuseIdentifier:@"ZKTailCell"];
+    
+    [self addSubview:_tableView];
+}
+
+- (void)dealloc
+{
+    NSLog(@"ZKTreeListView->销毁");
+}
+
 #pragma mark -- UITableView Delegate
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    ZKTreeNode *node = self.managers[indexPath.section].showNodes[indexPath.row];
+    if (node.rowHeight >= 0.f) return node.rowHeight;
+    if ([self.delegate respondsToSelector:@selector(treeListView:rowHeightForNode:atIndexPath:)]) {
+        CGFloat rowHeight = [self.delegate treeListView:self rowHeightForNode:node atIndexPath:indexPath];
+        node.rowHeight = rowHeight;
+        return rowHeight;
+    }
+    return 0.f;
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     ZKTreeNode *node = self.managers[indexPath.section].showNodes[indexPath.row];
-    if (self.isAutoExpand && node.childNodes.count != 0) {
+    if (self.isAutoExpand && node.childNodes.count > 0) {
         [self tableView:tableView didSelectNodes:@[node] withSection:indexPath.section expand:!node.isExpand];
     }
-
-    if ([self.delegate respondsToSelector:@selector(treeListView:didSelectRowAtIndexPath:withNode:)]) {
-        [self.delegate treeListView:self didSelectRowAtIndexPath:indexPath withNode:node];
+    
+    if ([self.delegate respondsToSelector:@selector(treeListView:didSelectNode:atIndexPath:)]) {
+        [self.delegate treeListView:self didSelectNode:node atIndexPath:indexPath];
     }
-}
-
-- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    if ([self.delegate respondsToSelector:@selector(treeListView:heightForNode:)]) {
-        ZKTreeNode *node = self.managers[indexPath.section].showNodes[indexPath.row];
-        return [self.delegate treeListView:self heightForNode:node];
-    }
-    return self.managers[indexPath.section].showNodes[indexPath.row].nodeHeight;
 }
 
 #pragma mark -- UITableView DataSource
@@ -268,47 +394,45 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row >= self.managers[indexPath.section].showNodes.count) {
-        return nil;
-    }
-    
     ZKTreeNode *node = self.managers[indexPath.section].showNodes[indexPath.row];
-    ZKTreeListViewCell *cell = [tableView dequeueReusableCellWithIdentifier:self.identifier forIndexPath:indexPath];
-    cell.node = node;
-    // 私有属性，这里通过KVC赋值
-    [cell setValue:@(_style) forKey:@"showStructureLine"];
-    
-    return cell;
+    if (node.isTail) {
+        ZKTailCell *cell = [tableView dequeueReusableCellWithIdentifier:@"ZKTailCell" forIndexPath:indexPath];
+        cell.node = node;
+        [cell setValue:@(_style) forKey:@"showStructureLine"];
+        
+        return cell;
+    } else {
+        ZKTreeListViewCell *cell = [self.delegate treeListView:self cellForNode:node atIndexPath:indexPath];
+        cell.node = node;
+        [cell setValue:@(_style) forKey:@"showStructureLine"];
+        
+        return cell;
+    }
+}
+
+#pragma mark -- UIScrollView Delegate
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView
+{
+    if ([self.delegate respondsToSelector:@selector(treeListView:didScroll:)]) {
+        [self.delegate treeListView:self didScroll:scrollView.contentOffset];
+    }
+}
+
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
+{
+    if ([self.delegate respondsToSelector:@selector(treeListView:willBeginDragging:)]) {
+        [self.delegate treeListView:self willBeginDragging:scrollView.contentOffset];
+    }
+}
+
+- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+{
+    if ([self.delegate respondsToSelector:@selector(treeListView:didEndDragging:willDecelerate:)]) {
+        [self.delegate treeListView:self didEndDragging:scrollView.contentOffset willDecelerate:decelerate];
+    }
 }
 
 #pragma mark -- Setter && Getter
-- (void)setHeaderView:(UIView *)headerView
-{
-    _headerView = headerView;
-    _tableView.tableHeaderView = headerView;
-}
-
-- (void)setFooterView:(UIView *)footerView
-{
-    _footerView = footerView;
-    _tableView.tableFooterView = footerView;
-}
-
-- (UITableView *)tableView
-{
-    if (_tableView == nil) {
-        
-        _tableView = [[UITableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-        _tableView.delegate = self;
-        _tableView.dataSource = self;
-        _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-        _tableView.estimatedRowHeight = 0;
-        _tableView.estimatedSectionHeaderHeight = 0;
-        _tableView.estimatedSectionFooterHeight = 0;
-    }
-    return _tableView;
-}
-
 - (NSMutableArray<ZKTreeManager *> *)managers
 {
     if (_managers == nil) {
@@ -320,7 +444,7 @@
 
 - (NSArray<ZKTreeNode *> *)allNodes
 {
-    NSMutableArray *tempMutArray = @[].mutableCopy;
+    NSMutableArray *tempMutArray = [NSMutableArray array];
     for (ZKTreeManager *manager in self.managers) {
         [tempMutArray addObjectsFromArray:manager.allNodes];
     }
@@ -329,17 +453,26 @@
 
 - (NSArray<ZKTreeNode *> *)showNodes
 {
-    NSMutableArray *tempMutArray = @[].mutableCopy;
-    for (ZKTreeManager *manager in self.managers) {
+    NSMutableArray *tempMutArray = [NSMutableArray array];
+    for (NSInteger i = 0; i < self.managers.count; i++) {
+        ZKTreeManager *manager = self.managers[i];
         [tempMutArray addObjectsFromArray:manager.showNodes];
     }
     return tempMutArray;
 }
 
-#pragma mark -- Other
-- (void)dealloc
+- (NSInteger)expandLevel
 {
-    NSLog(@"ZKTreeListView->销毁");
+    NSInteger showLevel = 0;
+    for (ZKTreeManager *manager in self.managers) {
+        showLevel = MAX(showLevel, manager.showLevel);
+    }
+    return showLevel;
+}
+
+- (void)setExpandLevel:(NSInteger)expandLevel
+{
+    [self expandAllNodesWithLevel:expandLevel];
 }
 
 @end

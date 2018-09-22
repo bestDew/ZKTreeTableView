@@ -32,11 +32,11 @@
 - (void)addSubViews
 {
     UIImageView *arrowImgView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"arrow"]];
-    [self.containerView addSubview:arrowImgView];
+    [self.view addSubview:arrowImgView];
     _arrowImgView = arrowImgView;
     
     UILabel *titleLabel = [[UILabel alloc] init];
-    [self.containerView addSubview:titleLabel];
+    [self.view addSubview:titleLabel];
     _titleLabel = titleLabel;
 }
 
@@ -44,10 +44,10 @@
 {
     [super layoutSubviews];
     
-    _arrowImgView.frame = CGRectMake(0.f, 12.f, 20.f, 20.f);
+    _arrowImgView.frame = CGRectMake(16.f, 12.f, 20.f, 20.f);
     
-    CGFloat titleX = (_arrowImgView.isHidden) ? 0.f : 30.f;
-    _titleLabel.frame = CGRectMake(titleX, 0, self.containerView.frame.size.width - 15.f - titleX, 44.f);
+    CGFloat titleX = (_arrowImgView.isHidden) ? 16.f : 46.f;
+    _titleLabel.frame = CGRectMake(titleX, 0, self.view.frame.size.width - 16.f - titleX, 44.f);
 }
 
 - (void)refreshArrowDirection:(CGFloat)angle animated:(BOOL)animated

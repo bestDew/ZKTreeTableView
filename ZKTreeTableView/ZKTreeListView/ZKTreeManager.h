@@ -42,45 +42,58 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class ZKTreeNode;
 
 @interface ZKTreeManager : NSObject
 
-/** key 为节点 ID，value为对应的 node */
-@property (nonatomic, strong) NSMutableDictionary *nodesMap;
 /** 所有可见节点 */
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *showNodes;
+@property (nonatomic, readonly, strong) NSMutableArray<ZKTreeNode *> *showNodes;
 /** 所有节点 */
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *allNodes;
-/** 所有根节点 */
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *topNodes;
+@property (nonatomic, readonly, strong) NSMutableArray<ZKTreeNode *> *allNodes;
 /** 最小等级 */
-@property (nonatomic, assign) NSInteger minLevel;
+@property (nonatomic, readonly, assign) NSInteger minLevel;
 /** 最大等级 */
-@property (nonatomic, assign) NSInteger maxLevel;
-/** 已展开的最大等级 */
-@property (nonatomic, assign) NSInteger showLevel;
+@property (nonatomic, readonly, assign) NSInteger maxLevel;
+/** 当前展示的最大等级（默认为 minLevel） */
+@property (nonatomic, readonly, assign) NSInteger showLevel;
 
 /**
- 唯一初始化方法
+ 初始化方法
  
- @param nodes 原始数据包装成 treeNodes 数组
- @param level 折叠/展开等级，为 0 全部折叠，为 1 展开一级，以此类推，为 NSIntegerMax 全部展开
- @return treeManager 实例对象
+ @param nodes 节点数组
+ @param minLevel 节点最小等级
+ @return manager 实例
  */
-- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes expandLevel:(NSInteger)level;
+- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel;
++ (instancetype)managerWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel;
+
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
 
+/**
+ 给父节点追加一组子节点
+ 
+ @param nodes 子节点数组
+ @param node 父节点（若 node 为空，则追加在根节点末尾）
+ */
+- (void)appendChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node;
+/** 删除一个节点（包含子节点） */
+- (void)deleteNode:(ZKTreeNode *)node;
+
 /** 展开/收起 node，返回所改变的 node 的个数 */
-- (NSInteger)expandNode:(ZKTreeNode *)node;
 - (NSInteger)expandNode:(ZKTreeNode *)node expand:(BOOL)isExpand;
 /** 展开/折叠到多少层级 */
-- (void)expandNodesWithLevel:(NSInteger)expandLevel
-                   completed:(void(^)(NSArray *noExpandArray))noExpandCompleted
-                andCompleted:(void(^)(NSArray *expandArray))expandCompleted;
+- (void)expandAllNodesWithLevel:(NSInteger)expandLevel
+              noExpandCompleted:(void(^)(NSArray<ZKTreeNode *> *noExpandArray))noExpandCompleted
+                expandCompleted:(void(^)(NSArray<ZKTreeNode *> *expandArray))expandCompleted;
 
-/** 在 showNodes 的 index 处插入一组节点 */
-- (void)insertNodes:(NSArray<ZKTreeNode *> *)nodes atIndex:(NSInteger)index;
+/** 向上查找相差 grades 个等级 的 node 的父节点 */
+- (ZKTreeNode *)superNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades;
+/** 根据 ID 获取 node */
+- (ZKTreeNode *)getNodeByID:(NSString *)ID;
 
 @end
+
+NS_ASSUME_NONNULL_END

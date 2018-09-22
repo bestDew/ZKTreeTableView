@@ -59,14 +59,11 @@
 
 @interface ZKTreeListViewCell ()
 
-@property (nonatomic, assign) CGFloat indenWidth; // 缩进宽度，默认为8.f
+@property (nonatomic, assign) BOOL showStructureLine;
 @property (nonatomic, strong) CALayer *horizontalLine;
 @property (nonatomic, strong) CALayer *verticalLine;
-@property (nonatomic, strong) CALayer *separator;
-@property (nonatomic, assign) BOOL showStructureLine; // 用于标记是否显示结构线
 
 @end
-
 
 @implementation ZKTreeListViewCell
 
@@ -75,10 +72,11 @@
 {
     if ([super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         
-        self.indenWidth = 8.f;
+        self.showStructureLine = NO;
         self.selectionStyle = UITableViewCellSelectionStyleNone;
         
-        [self.contentView addSubview:self.containerView];;
+        _view = [[UIView alloc] initWithFrame:CGRectZero];
+        [self.contentView addSubview:_view];
     }
     return self;
 }
@@ -88,57 +86,36 @@
 {
     [super layoutSubviews];
     
-    CGFloat x = 0.f;
     CGFloat maxWidth  = self.contentView.frame.size.width;
     CGFloat maxHeight = self.contentView.frame.size.height;
+    
+    CGFloat x = 0.f, horLineWidth = 0.f, verLineX = 36.f, verLineY = 40.f;
     
     // 禁用隐式动画
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     
     if (_node.level == 0) {
-        x = 16.f;
-        _horizontalLine.frame = CGRectZero;
+        verLineY = 56.f;
     } else if (_node.level == 1) {
-        x = 48.f;
-        _horizontalLine.frame = CGRectMake(x - 12.f, 27.5f, 12.f, 1.f);
+        x = 36.f;
+        horLineWidth = 12.f;
+        verLineX = 24.f;
     } else {
-        x = 68.f + (_node.level - 2) * (self.indenWidth + 12.f);
-        _horizontalLine.frame = CGRectMake(x - self.indenWidth, 27.5f, self.indenWidth, 1.f);
+        x = 60.f + (_node.level - 2) * 20.f;
+        horLineWidth = 8.f;
+        verLineX = 20.f;
     }
     
-    CGFloat radius = (_node.level == 0) ? 20.f : 12.f;
-    CGFloat verticalLineY = 16.f + radius * 2;
-    CGFloat verticalLineWidth = (_node.childNodes.count == 0 || !_node.isExpand) ? 0.f : 1.0f;
+    _view.frame = CGRectMake(x, 0.f, maxWidth - x, maxHeight);
     
-    _verticalLine.frame = CGRectMake(x + radius - 0.5, verticalLineY, verticalLineWidth, maxHeight - verticalLineY);
+    CGFloat horizontalLineY = 28.f - _node.isTail * 6.f;
+    _horizontalLine.frame = CGRectMake(0, horizontalLineY, horLineWidth, 1.f);
     
-    CGFloat containerHeight = (_showStructureLine) ? maxHeight : (maxHeight - 0.5f);
-    _containerView.frame = CGRectMake(x, 0.f, maxWidth - x, containerHeight);
-    _separator.frame = CGRectMake(x, containerHeight, maxWidth - x, 0.5f);
+    CGFloat verLineWidth = (_node.childNodes.count > 0 && _node.isExpand) ? 1.f : 0.f;
+    _verticalLine.frame = CGRectMake(verLineX, verLineY, verLineWidth, maxHeight - verLineY);
     
     [CATransaction commit];
-}
-
-- (void)removeAllLineLayers
-{
-    NSArray<CALayer *> *subLayers = self.contentView.layer.sublayers;
-    NSArray<CALayer *> *removedLayers = [subLayers filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
-        return [evaluatedObject isMemberOfClass:[ZKLayer class]];
-    }]];
-    [removedLayers enumerateObjectsUsingBlock:^(CALayer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-        [obj removeFromSuperlayer];
-    }];
-}
-
-- (void)parentNode:(ZKTreeNode *)pNode mutArray:(NSMutableArray<NSNumber *> *)mutArray
-{
-    if (pNode.level == 0) return;
-    
-    if (pNode.parentNode.childNodes.lastObject == pNode) {
-        [mutArray addObject:@(pNode.level - 1)];
-    }
-    [self parentNode:pNode.parentNode mutArray:mutArray];
 }
 
 - (void)addStructureLine
@@ -161,16 +138,16 @@
         CGFloat lineX = 0.f;
         
         if (i == 0) {
-            lineX = 35.5f;
+            lineX = 36.f;
         } else if (i == 1) {
-            lineX = 59.5f;
+            lineX = 60.f;
         } else {
-            lineX = 59.5f + (i - 1) * (self.indenWidth + 12.f);
+            lineX = 60.f + (i - 1) * 20.f;
         }
         // 判断 node 是否为叶节点
         NSArray<ZKTreeNode *> *nodes = _node.parentNode.childNodes;
         if ((nodes.lastObject == _node) && i == _node.level - 1) {
-            lineHeight = 28.f;
+            lineHeight = 28.f - _node.isTail * 6.f;
         }
         // 绘制结构线
         ZKLayer *otherLine = [ZKLayer layer];
@@ -179,11 +156,32 @@
     }
 }
 
+- (void)parentNode:(ZKTreeNode *)pNode mutArray:(NSMutableArray<NSNumber *> *)mutArray
+{
+    if (pNode.level == 0) return;
+    
+    if (pNode.parentNode.childNodes.lastObject == pNode) {
+        [mutArray addObject:@(pNode.level - 1)];
+    }
+    [self parentNode:pNode.parentNode mutArray:mutArray];
+}
+
+- (void)removeAllLineLayers
+{
+    NSArray<CALayer *> *subLayers = self.contentView.layer.sublayers;
+    NSArray<CALayer *> *removedLayers = [subLayers filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        return [evaluatedObject isMemberOfClass:[ZKLayer class]];
+    }]];
+    [removedLayers enumerateObjectsUsingBlock:^(CALayer * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+        [obj removeFromSuperlayer];
+    }];
+}
+
 // 限制 cell 事件响应区域
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
 {
-    CGPoint pt = [self.contentView convertPoint:point toView:self.containerView];
-    if ([self.containerView pointInside:pt withEvent:event]) {
+    CGPoint pt = [self convertPoint:point toView:_view];
+    if ([_view pointInside:pt withEvent:event]) {
         return [super hitTest:point withEvent:event];
     }
     return nil;
@@ -195,16 +193,13 @@
     _showStructureLine = showStructureLine;
     
     if (showStructureLine) {
-        [_separator removeFromSuperlayer];
-        _separator = nil;
-        [self.contentView.layer addSublayer:self.horizontalLine];
-        [self.contentView.layer addSublayer:self.verticalLine];
+        [_view.layer addSublayer:self.horizontalLine];
+        [_view.layer addSublayer:self.verticalLine];
     } else {
         [_horizontalLine removeFromSuperlayer];
         [_verticalLine removeFromSuperlayer];
         _horizontalLine = nil;
         _verticalLine = nil;
-        [self.contentView.layer addSublayer:self.separator];
     }
     [self addStructureLine];
 }
@@ -214,16 +209,6 @@
     _node = node;
     
     [self addStructureLine];
-}
-
-- (UIView *)containerView
-{
-    if (_containerView == nil) {
-        
-        _containerView = [[UIView alloc] initWithFrame:CGRectZero];
-        _containerView.backgroundColor = [UIColor whiteColor];
-    }
-    return _containerView;
 }
 
 - (CALayer *)horizontalLine
@@ -246,14 +231,74 @@
     return _verticalLine;
 }
 
-- (CALayer *)separator
+@end
+
+@interface ZKTailCell ()
+
+@property (nonatomic, strong) UILabel *titleLabel;
+@property (nonatomic, strong) UIActivityIndicatorView *indicatorView;
+
+@end
+
+@implementation ZKTailCell
+
+- (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
-    if (_separator == nil) {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         
-        _separator = [CALayer layer];
-        _separator.backgroundColor = [UIColor lightGrayColor].CGColor;
+        [self.view addSubview:self.titleLabel];
+        [self.view addSubview:self.indicatorView];
     }
-    return _separator;
+    return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    CGFloat titleLabelX = (self.node.level == 1) ? 12.f : 8.f;
+    CGFloat titleLabelY = (self.showStructureLine) ? 12.f : 5.f;
+    _titleLabel.frame = CGRectMake(titleLabelX, titleLabelY, self.view.frame.size.width - titleLabelX - 16.f, 24.f);
+    _indicatorView.center = _titleLabel.center;
+}
+
+- (UILabel *)titleLabel
+{
+    if (_titleLabel == nil) {
+        
+        _titleLabel = [[UILabel alloc] init];
+        _titleLabel.font = [UIFont systemFontOfSize:12.f];
+        _titleLabel.textAlignment = NSTextAlignmentCenter;
+        _titleLabel.textColor = [UIColor colorWithRed:0.53 green:0.54 blue:0.55 alpha:1.00];
+        _titleLabel.layer.backgroundColor = [UIColor colorWithRed:0.94 green:0.95 blue:0.95 alpha:1.00].CGColor;
+        _titleLabel.text = @"点击加载更多";
+        _titleLabel.layer.masksToBounds = YES;
+        _titleLabel.layer.cornerRadius = 8.f;
+    }
+    return _titleLabel;
+}
+
+- (UIActivityIndicatorView *)indicatorView
+{
+    if (_indicatorView == nil) {
+        
+        _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        _indicatorView.hidesWhenStopped = YES;
+    }
+    return _indicatorView;
+}
+
+- (void)setLoading:(BOOL)loading
+{
+    _loading = loading;
+    
+    if (loading) {
+        _titleLabel.text = nil;
+        [_indicatorView startAnimating];
+    } else {
+        _titleLabel.text = @"点击加载更多";
+        [_indicatorView stopAnimating];
+    }
 }
 
 @end
