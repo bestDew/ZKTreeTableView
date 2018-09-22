@@ -4,8 +4,9 @@
 
  ![](https://github.com/bestDew/ZKTreeTableView/raw/master/ZKTreeTableView/Untitled.gif)
  
- 
- ⚠️构建一个树结构，需要一些必要的参数：<br/>ID：当前节点唯一标识<br/>parentID：即为父节点的ID<br/>sortOrder：层级内子节点序号，用于排序
+## 重要事项
+
+ 构建一个树结构，需要一些必要的参数：<br/>ID：当前节点唯一标识<br/>parentID：即为父节点的ID<br/>sortOrder：层级内子节点序号，用于排序
  
 ## 框架结构
 
@@ -37,7 +38,7 @@
      node.level = level;
      /**
      框架目前暂不支持自适应行高，建议提前计算好行高，有助于提升性能
-     ⚠️注意：行高的计算依赖于level，若后台未返回level，此项可不设置，通过以下代理方法返回行高（此时level已内部自动设置）:
+     注意：行高的计算依赖于level，若后台未返回level，此项可不设置，通过以下代理方法返回行高（此时level已内部自动设置）:
      - (CGFloat)treeListView:(ZKTreeListView *)listView rowHeightForNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
      此代理方法会在每次返回时为node.rowHeight赋值，避免重复计算带来的性能消耗
      */
@@ -60,7 +61,7 @@
  
  ## 性能
  
- 考虑到autoLayout在cell的子控件较多时的性能不足，本框架采用最原始的frame布局😂，简单测了下，列表滚动时基本满帧状态
+ 考虑到autoLayout在cell的子控件较多时的性能不足，本框架采用最原始的frame布局😂，简单测了下，基本满帧运行
  
 ## 不足
 
