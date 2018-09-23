@@ -27,5 +27,6 @@ typedef void (^ResponseFailure)(NSError *error);
 /** 模拟请求数据 */
 + (void)mockRequestNodesDataWithParams:(id)params success:(ResponseSuccess)success failure:(ResponseFailure)failure;
 + (void)mackRequestMoreChildNodeDataWithParams:(id)params success:(ResponseSuccess)success failure:(ResponseFailure)failure;
++ (void)submitCommentsWithParams:(id)params success:(ResponseSuccess)success failure:(ResponseFailure)failure;
 
 @end

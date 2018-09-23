@@ -8,7 +8,11 @@
 
 #import "ZKTreeListViewCell.h"
 
+typedef void (^CheckBlock)(ZKTreeNode *node, BOOL isCheck);
+
 @interface CheckCell : ZKTreeListViewCell
+
+@property (nonatomic, copy) CheckBlock block;
 
 - (void)refreshArrowDirection:(CGFloat)angle animated:(BOOL)animated;
 

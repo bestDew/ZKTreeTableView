@@ -48,6 +48,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
 @interface ZKTreeManager ()
 {
     BOOL _flag; // 判断是否需要计算等级的标识
+    NSInteger _defaultExpandLevel; // 默认展开的等级
 }
 /** key 为节点 ID，value为对应的 node */
 @property (nonatomic, strong) NSMutableDictionary<NSString *, ZKTreeNode *> *nodesMap;
@@ -59,18 +60,17 @@ static NSString * const kTailIDPrefix = @"node_tail_";
 @implementation ZKTreeManager
 
 #pragma mark -- Init
-+ (instancetype)managerWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel
++ (instancetype)managerWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel expandLevel:(NSInteger)expandLevel
 {
-    return [[self alloc] initWithNodes:nodes minLevel:minLevel];
+    return [[self alloc] initWithNodes:nodes minLevel:minLevel expandLevel:expandLevel];
 }
 
-- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel
+- (instancetype)initWithNodes:(NSArray<ZKTreeNode *> *)nodes minLevel:(NSInteger)minLevel expandLevel:(NSInteger)expandLevel
 {
     if (self = [super init]) {
         
         _minLevel = minLevel;
         _maxLevel = minLevel;
-        _showLevel = minLevel;
         _allNodes = nodes.mutableCopy;
         _flag = ([nodes firstObject].level == -1);
         
@@ -82,6 +82,8 @@ static NSString * const kTailIDPrefix = @"node_tail_";
         [self setupLevel];
         // 4.子节点排序
         [self sortChildNodes];
+        // 5. 根据展开等级设置 showNodes
+        [self setupShowNodesWithExpandLevel:expandLevel];
     }
     return self;
 }
@@ -112,8 +114,6 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     }
     // 根节点排序
     _rootNodes = [self sortedNodes:tempMutArray];
-    // 默认展示根节点
-    _showNodes = [NSMutableArray arrayWithArray:_rootNodes];
 }
 
 - (void)setupLevel
@@ -174,15 +174,18 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     return tail;
 }
 
-- (void)addNode:(ZKTreeNode *)node toMutableArray:(NSMutableArray *)mutArray
+- (void)setupShowNodesWithExpandLevel:(NSInteger)level
 {
-    [mutArray addObject:node];
+    level = MAX(level, _minLevel);
+    level = MIN(level, _maxLevel);
+    _showLevel = level;
+    _defaultExpandLevel = level;
     
-    if (!node.isExpand) return;
-    
-    for (ZKTreeNode *tempNode in node.childNodes) {
-        [self addNode:tempNode toMutableArray:mutArray];
+    NSMutableArray *showNodes = [NSMutableArray array];
+    for (ZKTreeNode *node in self.rootNodes) {
+        [self addShowNode:node toShowNodes:showNodes andShowLevel:level];
     }
+    _showNodes = showNodes;
 }
 
 #pragma mark -- Public Methods
@@ -192,14 +195,14 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     
     // 1.构建一个临时管理者
     NSInteger minLevel = node ? (node.level + 1) : _minLevel;
-    ZKTreeManager *tempManager = [ZKTreeManager managerWithNodes:nodes minLevel:minLevel];
+    ZKTreeManager *tempManager = [ZKTreeManager managerWithNodes:nodes minLevel:minLevel expandLevel:_defaultExpandLevel];
     // 2.建立父子关系
     NSInteger tempRootNodesCount = tempManager.rootNodes.count;
     if (node == nil) { // 根节点
         // 重置序号
         NSInteger location = [_rootNodes lastObject].order + 1;
-        for (NSInteger i = 0; i < tempRootNodesCount; i++) {
-            ZKTreeNode *tempNode = tempManager.rootNodes[i];
+        for (ZKTreeNode *tempNode in tempManager.rootNodes) {
+            NSInteger i = [tempManager.rootNodes indexOfObject:tempNode];
             [tempNode setValue:@(location + i) forKey:@"order"];
         }
         // 插入数据
@@ -225,8 +228,8 @@ static NSString * const kTailIDPrefix = @"node_tail_";
         // 2.重置序号并建立父子关系
         NSArray<ZKTreeNode *> *childNodeArray = node.childNodes.copy;
         NSInteger location = [childNodeArray lastObject].order + 1;
-        for (NSInteger i = 0; i < tempRootNodesCount; i++) {
-            ZKTreeNode *tempNode = tempManager.rootNodes[i];
+        for (ZKTreeNode *tempNode in tempManager.rootNodes) {
+            NSInteger i = [tempManager.rootNodes indexOfObject:tempNode];
             tempNode.parentNode = node;
             [tempNode setValue:@(location + i) forKey:@"order"];
         }
@@ -237,7 +240,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
         if (node.isExpand) {
             NSMutableArray *tempMutArray = [NSMutableArray array];
             for (ZKTreeNode *tempNode in childNodeArray) {
-                [self addNode:tempNode toMutableArray:tempMutArray];
+                [self addNode:tempNode toMutableArray:tempMutArray flag:YES];
             }
             NSInteger location = [_showNodes indexOfObject:node] + tempMutArray.count + 1;
             NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, tempManager.showNodes.count)];
@@ -274,7 +277,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     
     if (isExpand) { // 展开
         for (ZKTreeNode *tempNode in node.childNodes) {
-            [self addNode:tempNode toMutableArray:tempMutArray];
+            [self addNode:tempNode toMutableArray:tempMutArray flag:YES];
         }
         NSInteger location = [_showNodes indexOfObject:node] + 1;
         NSIndexSet *indexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, tempMutArray.count)];
@@ -312,8 +315,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     // 先一级一级折叠
     for (NSInteger level = _maxLevel; level >= expandLevel; level--) {
         NSMutableArray *nodesArray = [NSMutableArray array];
-        for (NSInteger i = 0; i < _showNodes.count; i++) {
-            ZKTreeNode *node = _showNodes[i];
+        for (ZKTreeNode *node in _showNodes) {
             if (node.isExpand && node.level == level) {
                 [nodesArray addObject:node];
             }
@@ -324,8 +326,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     // 再一级一级展开
     for (NSInteger level = 0; level < expandLevel; level++) {
         NSMutableArray *nodesArray = [NSMutableArray array];
-        for (NSInteger i = 0; i < _showNodes.count; i++) {
-            ZKTreeNode *node = _showNodes[i];
+        for (ZKTreeNode *node in _showNodes) {
             if (!node.isExpand && node.level == level) {
                 [nodesArray addObject:node];
             }
@@ -335,7 +336,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     }
 }
 
-- (ZKTreeNode *)superNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades
+- (ZKTreeNode *)parentNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades
 {
     if (grades < 0) return nil;
     while (grades > 0) {
@@ -343,6 +344,14 @@ static NSString * const kTailIDPrefix = @"node_tail_";
         grades --;
     }
     return node;
+}
+
+- (NSArray<ZKTreeNode *> *)getAllChildNodesWithNode:(ZKTreeNode *)node
+{
+    NSMutableArray *mutArray = [NSMutableArray array];
+    [self addNode:node toMutableArray:mutArray flag:NO];
+    
+    return mutArray;
 }
 
 - (ZKTreeNode *)getNodeByID:(NSString *)ID
@@ -381,6 +390,29 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     NSArray *childNodes = node.childNodes.copy;
     for (ZKTreeNode *childNode in childNodes) {
         [self removeNode:childNode];
+    }
+}
+
+- (void)addShowNode:(ZKTreeNode *)node toShowNodes:(NSMutableArray *)showNodes andShowLevel:(NSInteger)level
+{
+    if (node.level > level) return;
+    
+    [showNodes addObject:node];
+    
+    node.expand = (node.level != level);
+    for (ZKTreeNode *childNode in node.childNodes) {
+        [self addShowNode:childNode toShowNodes:showNodes andShowLevel:level];
+    }
+}
+
+- (void)addNode:(ZKTreeNode *)node toMutableArray:(NSMutableArray *)mutArray flag:(BOOL)flag
+{
+    [mutArray addObject:node];
+    
+    if (flag && !node.isExpand) return;
+    
+    for (ZKTreeNode *tempNode in node.childNodes) {
+        [self addNode:tempNode toMutableArray:mutArray flag:flag];
     }
 }
 

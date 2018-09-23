@@ -8,6 +8,10 @@
 
 #import "ZKTreeListViewCell.h"
 
+typedef void (^ExpandBlock)(ZKTreeNode *node);
+
 @interface CommentsCell : ZKTreeListViewCell
+
+@property (nonatomic, copy) ExpandBlock block;
 
 @end

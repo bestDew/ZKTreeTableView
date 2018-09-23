@@ -14,11 +14,17 @@
 #import "ZKTreeListView.h"
 #import "YYFPSLabel.h"
 #import "RequestHepler.h"
+#import "ZKToolBar.h"
+#import "ZKInputView.h"
 
-@interface TreeListViewController () <ZKTreeListViewDelegate>
+@interface TreeListViewController () <ZKTreeListViewDelegate, ZKToolBarDelegate, ZKInputViewDelagete>
 
 @property (nonatomic, strong) ZKTreeListView *listView;
 @property (nonatomic, assign) NSInteger pageIndex;
+@property (nonatomic, strong) ZKToolBar *toolBar;
+@property (nonatomic, strong) ZKInputView *input_view;
+
+@property (nonatomic, weak) ZKTreeNode *targetNode;
 
 @end
 
@@ -36,6 +42,7 @@ static NSString *identifier = @"CommentsCell";
     self.navigationItem.rightBarButtonItem = expandAllItem;
     
     [self.view addSubview:self.listView];
+    [self.view addSubview:self.toolBar];
     
     YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
     [fpsLabel sizeToFit];
@@ -85,35 +92,93 @@ static NSString *identifier = @"CommentsCell";
 
 - (void)expandAllNodes
 {
-    static BOOL isExpandAll = YES;
-    _listView.expandLevel = isExpandAll ? NSIntegerMax : 0;
-    isExpandAll = !isExpandAll;
+    static NSInteger expandLevel = NSIntegerMax;
+    [_listView expandAllNodesWithLevel:expandLevel];
+    expandLevel = (expandLevel == 0) ? NSIntegerMax : 0;
+}
+
+- (void)submitComments:(NSString *)content withNode:(ZKTreeNode *)node
+{
+    NSInteger level = node.level;
+    if (node) level ++;
+    NSInteger order = node ? node.childNodes.count : _listView.allNodes.count;
+    id ID = node ? node.ID : [NSNull null];
+    NSDictionary *params = @{@"pid":ID,
+                             @"level":@(level),
+                             @"order":@(order),
+                             @"content":content};
+    [RequestHepler submitCommentsWithParams:params success:^(id response) {
+        [_input_view hide];
+        node.expand = YES;
+        node.childNodesCount ++; // 父节点子节点总数加一
+        _toolBar.brigeCount ++;  // 评论总数加一
+        ZKTreeNode *addNode = [self nodeForDictionary:response];
+        [_listView appendChildNodes:@[addNode] forNode:node];
+    } failure:^(NSError *error) {
+        NSLog(@"请求出错：%@", error);
+    }];
 }
 
 #pragma mark -- ZKTreeListView Delgate
 - (void)treeListView:(ZKTreeListView *)listView didSelectNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
 {
     NSLog(@"节点ID = %@", node.ID);
-    ZKTailCell *cell = [listView cellForRowAtIndexPath:indexPath];
-    if ((!node.isTail) || cell.isLoading) return;
-    // 模拟子节点加载更多
-    cell.loading = YES;
-    node.pageIndex ++;
-    [self requestChildNodesDataWithNode:node cell:cell];
+    if (node.isTail) {
+        ZKTailCell *cell = [listView cellForRowAtIndexPath:indexPath];
+        if (cell.isLoading) return;
+        // 模拟子节点加载更多
+        cell.loading = YES;
+        node.pageIndex ++;
+        [self requestChildNodesDataWithNode:node cell:cell];
+    } else {
+        _targetNode = node;
+        CommentsModel *model = (CommentsModel *)node.data;
+        NSString *placeholder = [NSString stringWithFormat:@"回复  %@", model.nick_name];
+        [self showInputViewWithPlaceholder:placeholder];
+    }
 }
 
 //- (CGFloat)treeListView:(ZKTreeListView *)listView rowHeightForNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
 //{
 //    NSString *content = ((CommentsModel *)node.data).content;
-//    CGFloat rowHeight = (_style == ZKTreeListViewStyleNone) ? 44.f : [self nodeHeightWithLevel:node.level content:content];
-//
+//    CGFloat rowHeight = [self nodeHeightWithLevel:node.level content:content];
 //    return rowHeight;
 //}
 
 - (ZKTreeListViewCell *)treeListView:(ZKTreeListView *)listView cellForNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
 {
+    __weak typeof(self) weakSelf = self;
     CommentsCell *cell = [listView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+    cell.block = ^(ZKTreeNode *node) {
+        [weakSelf.listView expandNodes:@[node] withExpand:!node.isExpand];
+    };
     return cell;
+}
+
+#pragma mark -- ZKToolBar Delgate
+- (void)toolBar:(ZKToolBar *)toolBar didCilckAtIndex:(NSInteger)index
+{
+    switch (index) {
+        case 0: { // 发表评论
+            _targetNode = nil;
+            [self showInputViewWithPlaceholder:@"我来说两句"];
+            break;
+        }
+        case 1: { // 查看评论
+            [_listView.tableView.mj_header beginRefreshing];
+            break;
+        }
+        case 2: { // 分享
+            NSLog(@"分享！");
+            break;
+        }
+    }
+}
+
+#pragma mark -- ZKInputView Delgate
+- (void)inputView:(ZKInputView *)inputView didSendText:(NSString *)text
+{
+    [self submitComments:text withNode:_targetNode];
 }
 
 #pragma mark -- Other
@@ -144,28 +209,6 @@ static NSString *identifier = @"CommentsCell";
     return [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin attributes:attributes context:nil].size;
 }
 
-- (ZKTreeListView *)listView
-{
-    if (_listView == nil) {
-        _listView = [[ZKTreeListView alloc] initWithFrame:self.view.bounds style:ZKTreeListViewStyleStructureLine];
-        _listView.delegate = self;
-        _listView.showAnimation = NO;
-        _listView.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 16.f)];
-        [_listView registerClass:[CommentsCell class] forCellReuseIdentifier:identifier];
-        
-        __weak typeof(self) weakSelf = self;
-        _listView.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-            weakSelf.pageIndex = 1;
-            [weakSelf requestNodesData];
-        }];
-        _listView.tableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
-            weakSelf.pageIndex ++;
-            [weakSelf requestNodesData];
-        }];
-    }
-    return _listView;
-}
-
 - (ZKTreeNode *)nodeForDictionary:(NSDictionary *)dict
 {
     // 1.字典转模型
@@ -186,6 +229,63 @@ static NSString *identifier = @"CommentsCell";
     node.childNodesCount = [model.childs_count integerValue];
     
     return node;
+}
+
+- (void)showInputViewWithPlaceholder:(NSString *)placeholder
+{
+    self.input_view.placeholder = placeholder;
+    [self.input_view show];
+}
+
+#pragma mark -- Lazy Load
+- (ZKTreeListView *)listView
+{
+    if (_listView == nil) {
+        _listView = [[ZKTreeListView alloc] initWithFrame:self.view.bounds style:ZKTreeListViewStyleStructureLine];
+        _listView.delegate = self;
+        _listView.autoExpand = NO;
+        _listView.showAnimation = NO;
+        _listView.defaultExpandLevel = 2;
+        _listView.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 16.f)];
+        [_listView registerClass:[CommentsCell class] forCellReuseIdentifier:identifier];
+        
+        __weak typeof(self) weakSelf = self;
+        _listView.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
+            weakSelf.pageIndex = 1;
+            [weakSelf requestNodesData];
+        }];
+        _listView.tableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
+            weakSelf.pageIndex ++;
+            [weakSelf requestNodesData];
+        }];
+    }
+    return _listView;
+}
+
+- (ZKToolBar *)toolBar
+{
+    if (_toolBar == nil) {
+        
+        _toolBar = [[ZKToolBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 48.f, self.view.frame.size.width, 48.f)];
+        _toolBar.delegate = self;
+        _toolBar.brigeCount = 666;
+        _toolBar.backgroundColor = [UIColor whiteColor];
+    }
+    return _toolBar;
+}
+
+- (ZKInputView *)input_view
+{
+    if (_input_view == nil) {
+        
+        _input_view = [[ZKInputView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 48.f)];
+        _input_view.backgroundColor = [UIColor whiteColor];
+        _input_view.maxLine = 3;
+        _input_view.maxCount = 200;
+        _input_view.delegate = self;
+        _input_view.font = [UIFont systemFontOfSize:16.f];
+    }
+    return _input_view;
 }
 
 @end

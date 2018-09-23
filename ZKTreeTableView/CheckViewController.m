@@ -12,10 +12,12 @@
 #import "ZKTreeListView.h"
 #import "YYFPSLabel.h"
 #import "RequestHepler.h"
+#import "CheckNode.h"
 
 @interface CheckViewController () <ZKTreeListViewDelegate>
 
 @property (nonatomic, strong) ZKTreeListView *listView;
+@property (nonatomic, strong) UIActivityIndicatorView *indicatorView;
 
 @end
 
@@ -28,9 +30,11 @@ static NSString *identifier = @"CheckCell";
     [super viewDidLoad];
     
     UIBarButtonItem *expandAllItem = [[UIBarButtonItem alloc] initWithTitle:@"全部展开" style:UIBarButtonItemStylePlain target:self action:@selector(expandAllNodes)];
-    self.navigationItem.rightBarButtonItem = expandAllItem;
+    UIBarButtonItem *checkAllItem = [[UIBarButtonItem alloc] initWithTitle:@"全部勾选" style:UIBarButtonItemStylePlain target:self action:@selector(checkAllNodes)];
+    self.navigationItem.rightBarButtonItems = @[expandAllItem, checkAllItem];
     
     [self.view addSubview:self.listView];
+    [self.view addSubview:self.indicatorView];
     
     YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
     [fpsLabel sizeToFit];
@@ -51,15 +55,17 @@ static NSString *identifier = @"CheckCell";
             CommentsModel *model = [CommentsModel modelWithDict:dataDict];
             // 2.创建 node
             NSInteger sortOrder = [model.order_no integerValue];
-            ZKTreeNode *node = [ZKTreeNode nodeWithID:model.ID
-                                             parentID:model.pid
-                                            sortOrder:sortOrder
-                                                 data:model];
+            CheckNode *node = [CheckNode nodeWithID:model.ID
+                                           parentID:model.pid
+                                          sortOrder:sortOrder
+                                               data:model];
+            node.checked = NO;
             node.rowHeight = 44.f;
             
             [nodes addObject:node];
         }
         // 4.加载数据
+        [_indicatorView stopAnimating];
         [_listView loadNodes:nodes];
     } failure:^(NSError *error) {
         NSLog(@"请求失败：%@", error);
@@ -68,14 +74,31 @@ static NSString *identifier = @"CheckCell";
 
 - (void)expandAllNodes
 {
-    static BOOL isExpandAll = YES;
-    _listView.expandLevel = isExpandAll ? NSIntegerMax : 0;
-    isExpandAll = !isExpandAll;
+    static NSInteger expandLevel = NSIntegerMax;
+    [_listView expandAllNodesWithLevel:expandLevel];
+    expandLevel = (expandLevel == 0) ? NSIntegerMax : 0;
     
-    for (ZKTreeNode *node in _listView.showNodes) {
+    for (CheckNode *node in _listView.showNodes) {
         CheckCell *cell = [_listView cellForNode:node];
         CGFloat angle = (node.isExpand && node.childNodes.count > 0) ? M_PI_2 : 0.f;
         [cell refreshArrowDirection:angle animated:YES];
+    }
+}
+
+- (void)checkAllNodes
+{
+    for (CheckNode *node in _listView.allNodes) {
+        node.checked = !node.isChecked;
+    }
+    [_listView reloadNodes:_listView.allNodes];
+}
+
+- (void)checkNode:(CheckNode *)node withCheck:(BOOL)isCheck mutableArray:(NSMutableArray<CheckNode *> *)mutArray
+{
+    node.checked = isCheck;
+    [mutArray addObject:node];
+    for (CheckNode *childNode in node.childNodes) { // 递归勾选
+        [self checkNode:childNode withCheck:isCheck mutableArray:mutArray];
     }
 }
 
@@ -89,7 +112,13 @@ static NSString *identifier = @"CheckCell";
 
 - (ZKTreeListViewCell *)treeListView:(ZKTreeListView *)listView cellForNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
 {
+    __weak typeof(self) weakSelf = self;
     CheckCell *cell = [listView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
+    cell.block = ^(ZKTreeNode *node, BOOL isCheck) {
+        NSMutableArray<CheckNode *> *mutArray = [NSMutableArray array];
+        [weakSelf checkNode:(CheckNode *)node withCheck:isCheck mutableArray:mutArray];
+        [weakSelf.listView reloadNodes:mutArray];
+    };
     return cell;
 }
 
@@ -103,6 +132,19 @@ static NSString *identifier = @"CheckCell";
         [_listView registerClass:[CheckCell class] forCellReuseIdentifier:identifier];
     }
     return _listView;
+}
+
+- (UIActivityIndicatorView *)indicatorView
+{
+    if (_indicatorView == nil) {
+        
+        _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhiteLarge];
+        _indicatorView.color = [UIColor grayColor];
+        _indicatorView.center = self.view.center;
+        _indicatorView.hidesWhenStopped = YES;
+        [_indicatorView startAnimating];
+    }
+    return _indicatorView;
 }
 
 @end

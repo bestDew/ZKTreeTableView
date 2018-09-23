@@ -8,11 +8,13 @@
 
 #import "CheckCell.h"
 #import "CommentsModel.h"
+#import "CheckNode.h"
 
 @interface CheckCell ()
 
 @property (nonatomic, weak) UIImageView *arrowImgView;
 @property (nonatomic, weak) UILabel *titleLabel;
+@property (nonatomic, weak) UIButton *checkButton;
 
 @end
 
@@ -28,6 +30,16 @@
     return self;
 }
 
+#pragma mark -- Action
+- (void)check:(UIButton *)button
+{
+    button.selected = !button.isSelected;
+    
+    if (self.block) {
+        self.block(self.node, button.isSelected);
+    }
+}
+
 #pragma mark -- Other
 - (void)addSubViews
 {
@@ -38,6 +50,13 @@
     UILabel *titleLabel = [[UILabel alloc] init];
     [self.view addSubview:titleLabel];
     _titleLabel = titleLabel;
+    
+    UIButton *checkButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    [checkButton setImage:[UIImage imageNamed:@"options_none_icon"] forState:UIControlStateNormal];
+    [checkButton setImage:[UIImage imageNamed:@"options_selected_icon"] forState:UIControlStateSelected];
+    [checkButton addTarget:self action:@selector(check:) forControlEvents:UIControlEventTouchUpInside];
+    [self.view addSubview:checkButton];
+    _checkButton = checkButton;
 }
 
 - (void)layoutSubviews
@@ -48,7 +67,8 @@
     _arrowImgView.frame = CGRectMake(arrowX, 12.f, 20.f, 20.f);
     
     CGFloat titleX = (_arrowImgView.isHidden) ? 16.f : 46.f;
-    _titleLabel.frame = CGRectMake(titleX, 0, self.view.frame.size.width - titleX - 16.f, 44.f);
+    _titleLabel.frame = CGRectMake(titleX, 0, self.view.frame.size.width - titleX - 50.f, 44.f);
+    _checkButton.frame = CGRectMake(self.view.frame.size.width - 46.f, 7.f, 30.f, 30.f);
 }
 
 - (void)refreshArrowDirection:(CGFloat)angle animated:(BOOL)animated
@@ -68,6 +88,9 @@
 - (void)setNode:(ZKTreeNode *)node
 {
     [super setNode:node];
+    
+    CheckNode *checkNode = (CheckNode *)node;
+    _checkButton.selected = checkNode.isChecked;
     
     CommentsModel *model = (CommentsModel *)node.data;
     _titleLabel.text = model.nick_name;

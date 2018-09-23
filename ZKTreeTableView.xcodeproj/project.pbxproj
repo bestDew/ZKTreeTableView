@@ -27,6 +27,9 @@
 		FD7954382156855800D22B30 /* Untitled.gif in Resources */ = {isa = PBXBuildFile; fileRef = FD7954372156855800D22B30 /* Untitled.gif */; };
 		FD79543B2157517900D22B30 /* CheckViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD79543A2157517900D22B30 /* CheckViewController.m */; };
 		FD79543E21575A2F00D22B30 /* RequestHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = FD79543D21575A2F00D22B30 /* RequestHepler.m */; };
+		FD7954442157ECF900D22B30 /* ZKToolBar.m in Sources */ = {isa = PBXBuildFile; fileRef = FD7954432157ECF900D22B30 /* ZKToolBar.m */; };
+		FD7954472157ED8F00D22B30 /* ZKInputView.m in Sources */ = {isa = PBXBuildFile; fileRef = FD7954462157ED8F00D22B30 /* ZKInputView.m */; };
+		FD79544A2158127900D22B30 /* CheckNode.m in Sources */ = {isa = PBXBuildFile; fileRef = FD7954492158127900D22B30 /* CheckNode.m */; };
 		FDC697E72137F9A60037EF3B /* CommentsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC697E62137F9A60037EF3B /* CommentsCell.m */; };
 /* End PBXBuildFile section */
 
@@ -68,6 +71,12 @@
 		FD79543A2157517900D22B30 /* CheckViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CheckViewController.m; sourceTree = "<group>"; };
 		FD79543C21575A2F00D22B30 /* RequestHepler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RequestHepler.h; sourceTree = "<group>"; };
 		FD79543D21575A2F00D22B30 /* RequestHepler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RequestHepler.m; sourceTree = "<group>"; };
+		FD7954422157ECF900D22B30 /* ZKToolBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZKToolBar.h; sourceTree = "<group>"; };
+		FD7954432157ECF900D22B30 /* ZKToolBar.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZKToolBar.m; sourceTree = "<group>"; };
+		FD7954452157ED8F00D22B30 /* ZKInputView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZKInputView.h; sourceTree = "<group>"; };
+		FD7954462157ED8F00D22B30 /* ZKInputView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ZKInputView.m; sourceTree = "<group>"; };
+		FD7954482158127900D22B30 /* CheckNode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CheckNode.h; sourceTree = "<group>"; };
+		FD7954492158127900D22B30 /* CheckNode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CheckNode.m; sourceTree = "<group>"; };
 		FDC697E52137F9A60037EF3B /* CommentsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommentsCell.h; sourceTree = "<group>"; };
 		FDC697E62137F9A60037EF3B /* CommentsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommentsCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -156,6 +165,8 @@
 				FD79543A2157517900D22B30 /* CheckViewController.m */,
 				FD399B5E213E66DC0035983F /* CheckCell.h */,
 				FD399B5F213E66DC0035983F /* CheckCell.m */,
+				FD7954482158127900D22B30 /* CheckNode.h */,
+				FD7954492158127900D22B30 /* CheckNode.m */,
 				FD62A6D721366CD000815DAA /* TreeListViewController.h */,
 				FD62A6D821366CD000815DAA /* TreeListViewController.m */,
 				FD62A6F121367C6300815DAA /* CommentsModel.h */,
@@ -164,6 +175,10 @@
 				FDC697E62137F9A60037EF3B /* CommentsCell.m */,
 				FD79543C21575A2F00D22B30 /* RequestHepler.h */,
 				FD79543D21575A2F00D22B30 /* RequestHepler.m */,
+				FD7954422157ECF900D22B30 /* ZKToolBar.h */,
+				FD7954432157ECF900D22B30 /* ZKToolBar.m */,
+				FD7954452157ED8F00D22B30 /* ZKInputView.h */,
+				FD7954462157ED8F00D22B30 /* ZKInputView.m */,
 				FD02FDEE213C5177003F0F56 /* YYFPSLabel */,
 				FD59B368213FB6C1000349F9 /* ZKTreeListView */,
 				FD62A6DA21366CD000815DAA /* Main.storyboard */,
@@ -298,13 +313,16 @@
 				FD399B5A213E611D0035983F /* MainViewController.m in Sources */,
 				FD62A6D921366CD000815DAA /* TreeListViewController.m in Sources */,
 				FD79543E21575A2F00D22B30 /* RequestHepler.m in Sources */,
+				FD79544A2158127900D22B30 /* CheckNode.m in Sources */,
 				FD59B372213FB6C1000349F9 /* ZKTreeListView.m in Sources */,
 				FD62A6E421366CD200815DAA /* main.m in Sources */,
 				FD59B374213FB6C1000349F9 /* ZKTreeNode.m in Sources */,
 				FD62A6D621366CD000815DAA /* AppDelegate.m in Sources */,
 				FD59B371213FB6C1000349F9 /* ZKTreeManager.m in Sources */,
 				FD399B60213E66DC0035983F /* CheckCell.m in Sources */,
+				FD7954442157ECF900D22B30 /* ZKToolBar.m in Sources */,
 				FD79543B2157517900D22B30 /* CheckViewController.m in Sources */,
+				FD7954472157ED8F00D22B30 /* ZKInputView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

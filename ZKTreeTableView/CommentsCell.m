@@ -14,6 +14,7 @@
 @property (nonatomic, strong) UIImageView *imgView;
 @property (nonatomic, strong) UILabel *nickNameLabel;
 @property (nonatomic, strong) UILabel *contentLabel;
+@property (nonatomic, strong) UIButton *expandButton;
 
 @end
 
@@ -25,9 +26,18 @@
         
         [self.view addSubview:self.imgView];
         [self.view addSubview:self.nickNameLabel];
+        [self.view addSubview:self.expandButton];
         [self.view addSubview:self.contentLabel];
     }
     return self;
+}
+
+#pragma mark -- Action
+- (void)expand:(UIButton *)button
+{
+    if (self.block) {
+        self.block(self.node);
+    }
 }
 
 - (void)layoutSubviews
@@ -48,7 +58,8 @@
     
     _imgView.frame = CGRectMake(imgX, 16.f, imgSize, imgSize);
     _imgView.layer.cornerRadius = imgSize / 2;
-    _nickNameLabel.frame = CGRectMake(imgX + imgSize + 12.f, 20.f, self.view.frame.size.width - imgX - imgSize - 28.f, 20.f);
+    _nickNameLabel.frame = CGRectMake(imgX + imgSize + 12.f, 20.f, self.view.frame.size.width - imgX - imgSize - 50.f, 20.f);
+    _expandButton.frame = CGRectMake(CGRectGetMaxX(_nickNameLabel.frame) + 2.f, _nickNameLabel.frame.origin.y, 20.f, 20.f);
     _contentLabel.frame = CGRectMake(imgX + imgSize + 4.f, CGRectGetMaxY(_nickNameLabel.frame) + 4.f, self.view.frame.size.width - imgX - imgSize - 20.f, self.view.frame.size.height - CGRectGetMaxY(_nickNameLabel.frame) - 4.f);
     _contentLabel.layer.cornerRadius = 8.f;
 }
@@ -60,6 +71,8 @@
     CommentsModel *model = (CommentsModel *)node.data;
     
     self.nickNameLabel.text = model.nick_name;
+    self.expandButton.selected = node.isExpand;
+    self.expandButton.hidden = (node.childNodes.count == 0);
     self.imgView.image = [UIImage imageNamed:model.image_name];
     self.contentLabel.attributedText = [self attributedTextWithString:model.content];
 }
@@ -109,6 +122,18 @@
         _contentLabel.numberOfLines = 0;
     }
     return _contentLabel;
+}
+
+- (UIButton *)expandButton
+{
+    if (_expandButton == nil) {
+        
+        _expandButton = [UIButton buttonWithType:UIButtonTypeCustom];
+        [_expandButton setImage:[UIImage imageNamed:@"select_top_icon"] forState:UIControlStateNormal];
+        [_expandButton setImage:[UIImage imageNamed:@"select_down_icon"] forState:UIControlStateSelected];
+        [_expandButton addTarget:self action:@selector(expand:) forControlEvents:UIControlEventTouchUpInside];
+    }
+    return _expandButton;
 }
 
 @end

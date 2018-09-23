@@ -81,8 +81,8 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 @property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *allNodes;
 /** 已展示的数据 */
 @property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *showNodes;
-/** 展开的等级 */
-@property (nonatomic, assign) NSInteger expandLevel;
+/** 默认展开的等级 */
+@property (nonatomic, assign) NSInteger defaultExpandLevel;
 /** 代理 */
 @property (nonatomic, weak) id<ZKTreeListViewDelegate> delegate;
 /** 当点击 cell 的时候是否自动展开/折叠（默认为YES） */

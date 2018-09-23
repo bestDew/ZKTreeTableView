@@ -71,9 +71,8 @@
         _style = style;
         _autoExpand = YES;
         _showAnimation = YES;
+        _defaultExpandLevel = 0;
         _lock = dispatch_semaphore_create(1);
-
-        self.expandLevel = 0;
         
         [self addTableView];
     }
@@ -119,7 +118,7 @@
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
         // 2.构建管理者
-        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:mutNodes minLevel:0];
+        ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:mutNodes minLevel:0 expandLevel:_defaultExpandLevel];
         // 3.拼接节点
         [self.managers addObject:manager];
         dispatch_semaphore_signal(_lock);
@@ -451,26 +450,11 @@
 
 - (NSArray<ZKTreeNode *> *)showNodes
 {
-    NSMutableArray *tempMutArray = [NSMutableArray array];
-    for (NSInteger i = 0; i < self.managers.count; i++) {
-        ZKTreeManager *manager = self.managers[i];
-        [tempMutArray addObjectsFromArray:manager.showNodes];
-    }
-    return tempMutArray;
-}
-
-- (NSInteger)expandLevel
-{
-    NSInteger showLevel = 0;
+    NSMutableArray *resultMutArray = [NSMutableArray array];
     for (ZKTreeManager *manager in self.managers) {
-        showLevel = MAX(showLevel, manager.showLevel);
+        [resultMutArray addObjectsFromArray:manager.showNodes];
     }
-    return showLevel;
-}
-
-- (void)setExpandLevel:(NSInteger)expandLevel
-{
-    [self expandAllNodesWithLevel:expandLevel];
+    return resultMutArray;
 }
 
 @end

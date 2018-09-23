@@ -64,4 +64,25 @@
     });
 }
 
++ (void)submitCommentsWithParams:(id)params success:(ResponseSuccess)success failure:(ResponseFailure)failure
+{
+    NSDictionary *tempDict = (NSDictionary *)params;
+    NSError *error = [NSError errorWithDomain:@"com.ParamsError.Domain" code:429 userInfo:@{NSLocalizedDescriptionKey:@"传参错误"}];
+    if ((tempDict[@"level"] == nil) || (tempDict[@"order"] == nil) || (tempDict[@"pid"] == nil) || (tempDict[@"content"] == nil)) {
+        if (failure) failure(error);
+        return;
+    }
+    static NSInteger count = 429; count ++;
+    NSString *ID = [NSString stringWithFormat:@"回复_%zd", count];
+    NSDictionary *dict = @{@"id":ID,
+                           @"level":tempDict[@"level"],
+                           @"image_name":@"touxiang_nv",
+                           @"nick_name":@"我是用来测试的",
+                           @"content":tempDict[@"content"],
+                           @"order_no":tempDict[@"order"],
+                           @"pid":tempDict[@"pid"],
+                           @"childsCount": @(0)};
+    if (success) success(dict);
+}
+
 @end
