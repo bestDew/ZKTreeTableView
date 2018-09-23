@@ -7,6 +7,7 @@
 //
 
 #import "MainViewController.h"
+#import "CheckViewController.h"
 #import "TreeListViewController.h"
 
 @interface MainViewController ()
@@ -46,9 +47,18 @@
 
 - (void)buttonAction:(UIButton *)button
 {
-    TreeListViewController *treeListVC = [[TreeListViewController alloc] init];
-    treeListVC.style = button.tag - 10;
-    [self.navigationController pushViewController:treeListVC animated:YES];
+    switch (button.tag) {
+        case 10: {
+            CheckViewController *checkVC = [[CheckViewController alloc] init];
+            [self.navigationController pushViewController:checkVC animated:YES];
+            break;
+        }
+        case 11: {
+            TreeListViewController *treeListVC = [[TreeListViewController alloc] init];
+            [self.navigationController pushViewController:treeListVC animated:YES];
+            break;
+        }
+    }
 }
 
 @end

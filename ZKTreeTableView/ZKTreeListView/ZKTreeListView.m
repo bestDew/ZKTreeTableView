@@ -121,7 +121,6 @@
         // 2.构建管理者
         ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:mutNodes minLevel:0];
         // 3.拼接节点
-        //[self insertShowMoreNodeForManager:manager];
         [self.managers addObject:manager];
         dispatch_semaphore_signal(_lock);
         // 4.刷新界面
@@ -203,7 +202,6 @@
         NSAssert(manager, @"当前树结构中未找到目标node");
         // 2.删除节点
         [manager deleteNode:node];
-        //[self insertShowMoreNodeForManager:manager];
         // 3.刷新界面
         NSInteger section = [self.managers indexOfObject:manager];
         dispatch_semaphore_signal(_lock);

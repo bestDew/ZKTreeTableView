@@ -95,25 +95,28 @@
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     
-    if (_node.level == 0) {
-        verLineY = 56.f;
-    } else if (_node.level == 1) {
-        x = 36.f;
-        horLineWidth = 12.f;
-        verLineX = 24.f;
+    if (_showStructureLine) {
+        if (_node.level == 0) {
+            verLineY = 56.f;
+        } else if (_node.level == 1) {
+            x = 36.f;
+            horLineWidth = 12.f;
+            verLineX = 24.f;
+        } else {
+            x = 60.f + (_node.level - 2) * 20.f;
+            horLineWidth = 8.f;
+            verLineX = 20.f;
+        }
+        CGFloat horizontalLineY = 28.f - _node.isTail * 6.f;
+        _horizontalLine.frame = CGRectMake(0, horizontalLineY, horLineWidth, 1.f);
+        
+        CGFloat verLineWidth = (_node.childNodes.count > 0 && _node.isExpand) ? 1.f : 0.f;
+        _verticalLine.frame = CGRectMake(verLineX, verLineY, verLineWidth, maxHeight - verLineY);
     } else {
-        x = 60.f + (_node.level - 2) * 20.f;
-        horLineWidth = 8.f;
-        verLineX = 20.f;
+        x = 30.f * _node.level;
     }
     
     _view.frame = CGRectMake(x, 0.f, maxWidth - x, maxHeight);
-    
-    CGFloat horizontalLineY = 28.f - _node.isTail * 6.f;
-    _horizontalLine.frame = CGRectMake(0, horizontalLineY, horLineWidth, 1.f);
-    
-    CGFloat verLineWidth = (_node.childNodes.count > 0 && _node.isExpand) ? 1.f : 0.f;
-    _verticalLine.frame = CGRectMake(verLineX, verLineY, verLineWidth, maxHeight - verLineY);
     
     [CATransaction commit];
 }

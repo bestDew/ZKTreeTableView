@@ -10,12 +10,12 @@
 
 @interface CommentsModel : NSObject
 
-@property (nonatomic, readonly, strong) NSNumber *ID;           // 节点ID
-@property (nonatomic, readonly, strong) NSNumber *pid;          // 父节点ID
-@property (nonatomic, readonly, strong) NSNumber *level;        // 层级
+@property (nonatomic, readonly, copy)   NSString *ID;           // 节点ID
+@property (nonatomic, readonly, copy)   NSString *pid;          // 父节点ID
 @property (nonatomic, readonly, copy)   NSString *image_name;   // 头像
 @property (nonatomic, readonly, copy)   NSString *nick_name;    // 昵称
 @property (nonatomic, readonly, copy)   NSString *content;      // 评论内容
+@property (nonatomic, readonly, strong) NSNumber *level;        // 层级
 @property (nonatomic, readonly, strong) NSNumber *order_no;     // 序号
 @property (nonatomic, readonly, strong) NSNumber *childs_count; // 子节点总数
 

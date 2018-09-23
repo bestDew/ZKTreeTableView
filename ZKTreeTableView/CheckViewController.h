@@ -1,14 +1,13 @@
 //
-//  ViewController.h
+//  CheckViewController.h
 //  ZKTreeTableView
 //
-//  Created by bestdew on 2018/8/29.
+//  Created by bestdew on 2018/9/23.
 //  Copyright © 2018年 bestdew. All rights reserved.
 //
 
 #import <UIKit/UIKit.h>
 
-@interface TreeListViewController : UIViewController
+@interface CheckViewController : UIViewController
 
 @end
-

@@ -8,7 +8,7 @@
 
 #import "ZKTreeListViewCell.h"
 
-@interface CustomCell : ZKTreeListViewCell
+@interface CheckCell : ZKTreeListViewCell
 
 - (void)refreshArrowDirection:(CGFloat)angle animated:(BOOL)animated;
 

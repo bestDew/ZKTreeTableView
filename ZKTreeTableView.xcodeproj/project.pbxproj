@@ -11,7 +11,7 @@
 		FD02FDF3213C5177003F0F56 /* YYWeakProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = FD02FDEF213C5177003F0F56 /* YYWeakProxy.m */; };
 		FD02FDF4213C5177003F0F56 /* YYFPSLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD02FDF1213C5177003F0F56 /* YYFPSLabel.m */; };
 		FD399B5A213E611D0035983F /* MainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B59213E611D0035983F /* MainViewController.m */; };
-		FD399B60213E66DC0035983F /* CustomCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B5F213E66DC0035983F /* CustomCell.m */; };
+		FD399B60213E66DC0035983F /* CheckCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD399B5F213E66DC0035983F /* CheckCell.m */; };
 		FD59B371213FB6C1000349F9 /* ZKTreeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B369213FB6C1000349F9 /* ZKTreeManager.m */; };
 		FD59B372213FB6C1000349F9 /* ZKTreeListView.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B36E213FB6C1000349F9 /* ZKTreeListView.m */; };
 		FD59B373213FB6C1000349F9 /* ZKTreeListViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FD59B36F213FB6C1000349F9 /* ZKTreeListViewCell.m */; };
@@ -25,6 +25,8 @@
 		FD62A6F321367C6300815DAA /* CommentsModel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD62A6F221367C6300815DAA /* CommentsModel.m */; };
 		FD62A6F5213684AB00815DAA /* Resource.json in Resources */ = {isa = PBXBuildFile; fileRef = FD62A6F4213684AB00815DAA /* Resource.json */; };
 		FD7954382156855800D22B30 /* Untitled.gif in Resources */ = {isa = PBXBuildFile; fileRef = FD7954372156855800D22B30 /* Untitled.gif */; };
+		FD79543B2157517900D22B30 /* CheckViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FD79543A2157517900D22B30 /* CheckViewController.m */; };
+		FD79543E21575A2F00D22B30 /* RequestHepler.m in Sources */ = {isa = PBXBuildFile; fileRef = FD79543D21575A2F00D22B30 /* RequestHepler.m */; };
 		FDC697E72137F9A60037EF3B /* CommentsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC697E62137F9A60037EF3B /* CommentsCell.m */; };
 /* End PBXBuildFile section */
 
@@ -38,8 +40,8 @@
 		FD02FDF2213C5177003F0F56 /* YYWeakProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YYWeakProxy.h; sourceTree = "<group>"; };
 		FD399B58213E611D0035983F /* MainViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MainViewController.h; sourceTree = "<group>"; };
 		FD399B59213E611D0035983F /* MainViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MainViewController.m; sourceTree = "<group>"; };
-		FD399B5E213E66DC0035983F /* CustomCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CustomCell.h; sourceTree = "<group>"; };
-		FD399B5F213E66DC0035983F /* CustomCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CustomCell.m; sourceTree = "<group>"; };
+		FD399B5E213E66DC0035983F /* CheckCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CheckCell.h; sourceTree = "<group>"; };
+		FD399B5F213E66DC0035983F /* CheckCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CheckCell.m; sourceTree = "<group>"; };
 		FD59B369213FB6C1000349F9 /* ZKTreeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZKTreeManager.m; sourceTree = "<group>"; };
 		FD59B36A213FB6C1000349F9 /* ZKTreeListView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZKTreeListView.h; sourceTree = "<group>"; };
 		FD59B36B213FB6C1000349F9 /* ZKTreeNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZKTreeNode.h; sourceTree = "<group>"; };
@@ -62,6 +64,10 @@
 		FD62A6F221367C6300815DAA /* CommentsModel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommentsModel.m; sourceTree = "<group>"; };
 		FD62A6F4213684AB00815DAA /* Resource.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Resource.json; sourceTree = "<group>"; };
 		FD7954372156855800D22B30 /* Untitled.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = Untitled.gif; sourceTree = "<group>"; };
+		FD7954392157517900D22B30 /* CheckViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CheckViewController.h; sourceTree = "<group>"; };
+		FD79543A2157517900D22B30 /* CheckViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CheckViewController.m; sourceTree = "<group>"; };
+		FD79543C21575A2F00D22B30 /* RequestHepler.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RequestHepler.h; sourceTree = "<group>"; };
+		FD79543D21575A2F00D22B30 /* RequestHepler.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RequestHepler.m; sourceTree = "<group>"; };
 		FDC697E52137F9A60037EF3B /* CommentsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CommentsCell.h; sourceTree = "<group>"; };
 		FDC697E62137F9A60037EF3B /* CommentsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CommentsCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -146,14 +152,18 @@
 				FD62A6D521366CD000815DAA /* AppDelegate.m */,
 				FD399B58213E611D0035983F /* MainViewController.h */,
 				FD399B59213E611D0035983F /* MainViewController.m */,
+				FD7954392157517900D22B30 /* CheckViewController.h */,
+				FD79543A2157517900D22B30 /* CheckViewController.m */,
+				FD399B5E213E66DC0035983F /* CheckCell.h */,
+				FD399B5F213E66DC0035983F /* CheckCell.m */,
 				FD62A6D721366CD000815DAA /* TreeListViewController.h */,
 				FD62A6D821366CD000815DAA /* TreeListViewController.m */,
 				FD62A6F121367C6300815DAA /* CommentsModel.h */,
 				FD62A6F221367C6300815DAA /* CommentsModel.m */,
 				FDC697E52137F9A60037EF3B /* CommentsCell.h */,
 				FDC697E62137F9A60037EF3B /* CommentsCell.m */,
-				FD399B5E213E66DC0035983F /* CustomCell.h */,
-				FD399B5F213E66DC0035983F /* CustomCell.m */,
+				FD79543C21575A2F00D22B30 /* RequestHepler.h */,
+				FD79543D21575A2F00D22B30 /* RequestHepler.m */,
 				FD02FDEE213C5177003F0F56 /* YYFPSLabel */,
 				FD59B368213FB6C1000349F9 /* ZKTreeListView */,
 				FD62A6DA21366CD000815DAA /* Main.storyboard */,
@@ -287,12 +297,14 @@
 				FD02FDF3213C5177003F0F56 /* YYWeakProxy.m in Sources */,
 				FD399B5A213E611D0035983F /* MainViewController.m in Sources */,
 				FD62A6D921366CD000815DAA /* TreeListViewController.m in Sources */,
+				FD79543E21575A2F00D22B30 /* RequestHepler.m in Sources */,
 				FD59B372213FB6C1000349F9 /* ZKTreeListView.m in Sources */,
 				FD62A6E421366CD200815DAA /* main.m in Sources */,
 				FD59B374213FB6C1000349F9 /* ZKTreeNode.m in Sources */,
 				FD62A6D621366CD000815DAA /* AppDelegate.m in Sources */,
 				FD59B371213FB6C1000349F9 /* ZKTreeManager.m in Sources */,
-				FD399B60213E66DC0035983F /* CustomCell.m in Sources */,
+				FD399B60213E66DC0035983F /* CheckCell.m in Sources */,
+				FD79543B2157517900D22B30 /* CheckViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
