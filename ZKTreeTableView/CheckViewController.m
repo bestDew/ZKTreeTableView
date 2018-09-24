@@ -90,7 +90,7 @@ static NSString *identifier = @"CheckCell";
     for (CheckNode *node in _listView.allNodes) {
         node.checked = !node.isChecked;
     }
-    [_listView reloadNodes:_listView.allNodes];
+    [_listView reloadNodes:_listView.allNodes.allObjects];
 }
 
 - (void)checkNode:(CheckNode *)node withCheck:(BOOL)isCheck mutableArray:(NSMutableArray<CheckNode *> *)mutArray

@@ -68,7 +68,7 @@ static NSString *identifier = @"CommentsCell";
             [_listView loadNodes:nodes];
             [_listView.tableView.mj_header endRefreshing];
         } else {
-            [_listView appendNodes:nodes];
+            [_listView appendRootNodes:nodes];
             [_listView.tableView.mj_footer endRefreshing];
         }
     } failure:^(NSError *error) {
@@ -83,7 +83,7 @@ static NSString *identifier = @"CommentsCell";
                              @"order":@(node.parentNode.childNodes.count)};
     [RequestHepler mackRequestMoreChildNodeDataWithParams:params success:^(id response) {
         ZKTreeNode *addNode = [self nodeForDictionary:response];
-        [_listView appendChildNodes:@[addNode] forNode:node.parentNode];
+        [_listView addChildNodes:@[addNode] forNode:node.parentNode placedAtTop:NO];
         cell.loading = NO;
     } failure:^(NSError *error) {
         NSLog(@"请求出错：%@", error);
@@ -113,7 +113,7 @@ static NSString *identifier = @"CommentsCell";
         node.childNodesCount ++; // 父节点子节点总数加一
         _toolBar.brigeCount ++;  // 评论总数加一
         ZKTreeNode *addNode = [self nodeForDictionary:response];
-        [_listView appendChildNodes:@[addNode] forNode:node];
+        [_listView addChildNodes:@[addNode] forNode:node placedAtTop:YES];
     } failure:^(NSError *error) {
         NSLog(@"请求出错：%@", error);
     }];

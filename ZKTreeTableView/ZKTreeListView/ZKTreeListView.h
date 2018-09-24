@@ -78,7 +78,7 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 /** 样式 */
 @property (nonatomic, readonly, assign) ZKTreeListViewStyle style;
 /** 全部数据，包含已展示的数据和未展示的数据 */
-@property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *allNodes;
+@property (nonatomic, readonly, strong) NSSet<ZKTreeNode *> *allNodes;
 /** 已展示的数据 */
 @property (nonatomic, readonly, strong) NSArray<ZKTreeNode *> *showNodes;
 /** 默认展开的等级 */
@@ -100,10 +100,18 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 - (void)loadNodes:(NSArray<ZKTreeNode *> *)nodes;
 /** 重新加载一组节点 */
 - (void)reloadNodes:(NSArray<ZKTreeNode *> *)nodes;
-/** 在根节点末尾追加数据（会创建新的分组） */
-- (void)appendNodes:(NSArray<ZKTreeNode *> *)nodes;
-/** 在 node 子节点的末尾追加子节点（当 node == nil 时，在根节点末尾追加数据，与 -appendNodes: 的区别是：此方法不会创建新的分组） */
-- (void)appendChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node;
+/** 追加根节点（会创建新的分组） */
+- (void)appendRootNodes:(NSArray<ZKTreeNode *> *)nodes;
+/**
+ 在 node 子节点的末尾追加子节点
+
+ @param nodes 需要添加的节点数组
+ @param node 需要添加子节点的目标节点，当 node == nil 时，添加根节点，但不会创建新的分组，在根节点追加数据时，建议使用 -appendNodes：
+ @param isTop 若为 YES，则在 头部添加，若为 NO，则在末尾添加
+ */
+- (void)addChildNodes:(NSArray<ZKTreeNode *> *)nodes
+                 forNode:(nullable ZKTreeNode *)node
+             placedAtTop:(BOOL)isTop;
 /** 删除一个节点（包含子节点） */
 - (void)deleteNode:(ZKTreeNode *)node;
 

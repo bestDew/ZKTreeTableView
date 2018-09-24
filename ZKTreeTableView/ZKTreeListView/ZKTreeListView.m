@@ -98,10 +98,10 @@
     // 1.先清空原始数据
     [self.managers removeAllObjects];
     // 2.再重新加载
-    [self appendNodes:nodes];
+    [self appendRootNodes:nodes];
 }
 
-- (void)appendNodes:(NSArray<ZKTreeNode *> *)nodes
+- (void)appendRootNodes:(NSArray<ZKTreeNode *> *)nodes
 {
     if (nodes == nil) return;
     
@@ -147,7 +147,7 @@
     }
 }
 
-- (void)appendChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node
+- (void)addChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node placedAtTop:(BOOL)isTop
 {
     if (nodes.count <= 0) return;
     
@@ -174,7 +174,7 @@
             }
         }
         // 2.插入数据
-        [manager appendChildNodes:mutNodes forNode:node];
+        [manager addChildNodes:mutNodes forNode:node placedAtTop:isTop];
         // 3.刷新界面
         NSInteger section = [self.managers indexOfObject:manager];
         dispatch_semaphore_signal(_lock);
@@ -439,13 +439,13 @@
     return _managers;
 }
 
-- (NSArray<ZKTreeNode *> *)allNodes
+- (NSSet<ZKTreeNode *> *)allNodes
 {
-    NSMutableArray *tempMutArray = [NSMutableArray array];
+    NSMutableSet *tempMutSet = [NSMutableSet set];
     for (ZKTreeManager *manager in self.managers) {
-        [tempMutArray addObjectsFromArray:manager.allNodes];
+        [tempMutSet unionSet:manager.allNodes];
     }
-    return tempMutArray;
+    return tempMutSet;
 }
 
 - (NSArray<ZKTreeNode *> *)showNodes

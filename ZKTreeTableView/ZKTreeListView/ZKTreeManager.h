@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 所有可见节点 */
 @property (nonatomic, readonly, strong) NSMutableArray<ZKTreeNode *> *showNodes;
 /** 所有节点 */
-@property (nonatomic, readonly, strong) NSMutableArray<ZKTreeNode *> *allNodes;
+@property (nonatomic, readonly, strong) NSMutableSet<ZKTreeNode *> *allNodes;
 /** 最小等级 */
 @property (nonatomic, readonly, assign) NSInteger minLevel;
 /** 最大等级 */
@@ -82,15 +82,24 @@ NS_ASSUME_NONNULL_BEGIN
  给父节点追加一组子节点
  
  @param nodes 子节点数组
- @param node 父节点（若 node 为空，则追加在根节点末尾）
+ @param node 父节点（若 node 为空，则追加在根节点）
+ @param isTop 是否置顶（若为 YES：追加在头部，为 NO 则追加在末尾）
  */
-- (void)appendChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node;
+- (void)addChildNodes:(NSArray<ZKTreeNode *> *)nodes
+                 forNode:(nullable ZKTreeNode *)node
+             placedAtTop:(BOOL)isTop;
 /** 删除一个节点（包含子节点） */
 - (void)deleteNode:(ZKTreeNode *)node;
 
 /** 展开/收起 node，返回所改变的 node 的个数 */
 - (NSInteger)expandNode:(ZKTreeNode *)node expand:(BOOL)isExpand;
-/** 展开/折叠到多少层级 */
+/**
+ 展开/折叠到多少层级
+
+ @param expandLevel 等级
+ @param noExpandCompleted 返回折叠所改变的所有节点
+ @param expandCompleted 返回展开所改变的所有节点
+ */
 - (void)expandAllNodesWithLevel:(NSInteger)expandLevel
               noExpandCompleted:(void(^)(NSArray<ZKTreeNode *> *noExpandArray))noExpandCompleted
                 expandCompleted:(void(^)(NSArray<ZKTreeNode *> *expandArray))expandCompleted;
