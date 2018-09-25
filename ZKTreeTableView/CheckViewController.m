@@ -36,7 +36,7 @@ static NSString *identifier = @"CheckCell";
     [self.view addSubview:self.listView];
     [self.view addSubview:self.indicatorView];
     
-    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
+    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 150, 100, 60, 30)];
     [fpsLabel sizeToFit];
     [self.view addSubview:fpsLabel];
     

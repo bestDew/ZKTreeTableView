@@ -17,6 +17,9 @@
 #import "ZKToolBar.h"
 #import "ZKInputView.h"
 
+#define IPHONE_X ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+#define BOTTOM_MARGIN (IPHONE_X ? 34.f : 0.f)
+
 @interface TreeListViewController () <ZKTreeListViewDelegate, ZKToolBarDelegate, ZKInputViewDelagete>
 
 @property (nonatomic, strong) ZKTreeListView *listView;
@@ -44,7 +47,7 @@ static NSString *identifier = @"CommentsCell";
     [self.view addSubview:self.listView];
     [self.view addSubview:self.toolBar];
     
-    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 70, 84, 60, 30)];
+    YYFPSLabel *fpsLabel = [[YYFPSLabel alloc] initWithFrame:CGRectMake(self.view.bounds.size.width - 150, 100, 60, 30)];
     [fpsLabel sizeToFit];
     [self.view addSubview:fpsLabel];
     
@@ -109,7 +112,6 @@ static NSString *identifier = @"CommentsCell";
                              @"content":content};
     [RequestHepler submitCommentsWithParams:params success:^(id response) {
         [_input_view hide];
-        node.expand = YES;
         node.childNodesCount ++; // 父节点子节点总数加一
         _toolBar.brigeCount ++;  // 评论总数加一
         ZKTreeNode *addNode = [self nodeForDictionary:response];
@@ -266,7 +268,7 @@ static NSString *identifier = @"CommentsCell";
 {
     if (_toolBar == nil) {
         
-        _toolBar = [[ZKToolBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 48.f, self.view.frame.size.width, 48.f)];
+        _toolBar = [[ZKToolBar alloc] initWithFrame:CGRectMake(0, self.view.frame.size.height - 48.f - BOTTOM_MARGIN, self.view.frame.size.width, 48.f + BOTTOM_MARGIN)];
         _toolBar.delegate = self;
         _toolBar.brigeCount = 666;
         _toolBar.backgroundColor = [UIColor whiteColor];

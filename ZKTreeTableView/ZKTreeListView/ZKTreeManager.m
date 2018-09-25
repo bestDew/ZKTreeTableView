@@ -230,10 +230,14 @@ static NSString * const kTailIDPrefix = @"node_tail_";
                 }
             }
             // 4.重新设置 showNodes
+            NSInteger location = [_showNodes indexOfObject:node] + 1;
             if (node.isExpand) {
-                NSInteger location = [_showNodes indexOfObject:node] + 1;
                 NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, tempManager.showNodes.count)];
                 [self.showNodes insertObjects:tempManager.showNodes atIndexes:showIndexSet];
+            } else {
+                node.expand = YES;
+                NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, node.childNodes.count)];
+                [self.showNodes insertObjects:node.childNodes atIndexes:showIndexSet];
             }
         }
     } else { // 追加在末尾
@@ -284,6 +288,11 @@ static NSString * const kTailIDPrefix = @"node_tail_";
                 NSInteger location = [_showNodes indexOfObject:node] + tempMutArray.count + 1;
                 NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, tempManager.showNodes.count)];
                 [self.showNodes insertObjects:tempManager.showNodes atIndexes:showIndexSet];
+            } else {
+                node.expand = YES;
+                NSInteger location = [_showNodes indexOfObject:node] + 1;
+                NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, node.childNodes.count)];
+                [self.showNodes insertObjects:node.childNodes atIndexes:showIndexSet];
             }
         }
     }
