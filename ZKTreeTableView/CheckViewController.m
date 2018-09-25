@@ -95,10 +95,39 @@ static NSString *identifier = @"CheckCell";
 
 - (void)checkNode:(CheckNode *)node withCheck:(BOOL)isCheck mutableArray:(NSMutableArray<CheckNode *> *)mutArray
 {
+    if ((node == nil) || (mutArray == nil) || (node.isChecked == isCheck)) return;
+    
     node.checked = isCheck;
     [mutArray addObject:node];
-    for (CheckNode *childNode in node.childNodes) { // 递归勾选
-        [self checkNode:childNode withCheck:isCheck mutableArray:mutArray];
+    
+    CheckNode *pNode = (CheckNode *)(node.parentNode);
+    NSArray<CheckNode *> *nodes = (NSArray<CheckNode *> *)(node.childNodes);
+    
+    [self checkParentNode:pNode withCheck:isCheck mutableArray:mutArray];
+    [self checkChildNodes:nodes withCheck:isCheck mutableArray:mutArray];
+}
+
+// 向上寻找叶节点并勾选或取消勾选
+- (void)checkParentNode:(CheckNode *)pNode withCheck:(BOOL)isCheck mutableArray:(NSMutableArray<CheckNode *> *)mutArray
+{
+    if (pNode.childNodes.count != 1) return;
+    
+    pNode.checked = isCheck;
+    [mutArray addObject:pNode];
+    pNode = (CheckNode *)(pNode.parentNode);
+    [self checkParentNode:pNode withCheck:isCheck mutableArray:mutArray];
+}
+
+// 向下寻找子节点并勾选或取消勾选
+- (void)checkChildNodes:(NSArray<CheckNode *> *)nodes withCheck:(BOOL)isCheck mutableArray:(NSMutableArray<CheckNode *> *)mutArray
+{
+    if (nodes.count == 0) return;
+    
+    for (CheckNode *node in nodes) {
+        node.checked = isCheck;
+        [mutArray addObject:node];
+        NSArray<CheckNode *> *childNodes = (NSArray<CheckNode *> *)(node.childNodes);
+        [self checkChildNodes:childNodes withCheck:isCheck mutableArray:mutArray];
     }
 }
 
