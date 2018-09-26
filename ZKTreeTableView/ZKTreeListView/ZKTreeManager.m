@@ -137,7 +137,8 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     NSSet *tempSet = _allNodes.copy;
     for (ZKTreeNode *node in tempSet) {
         node.childNodes = [self sortedNodes:node.childNodes];
-        if (node.childNodesCount > node.childNodes.count) {
+        // array.count 为无符号型，而 node.childNodesCount 为有符号型，不能直接比较大小，必须先判断符号
+        if ((node.childNodesCount > 0) && (node.childNodesCount > node.childNodes.count)) {
             [self addTailForNode:node];
         }
     }
