@@ -1,6 +1,6 @@
 # ZKTreeListView
 
-## 运用了二叉树思想封装的树状结构列表框架
+## 运用二叉树思想封装的树状结构列表框架
 
  ![](https://github.com/bestDew/ZKTreeTableView/raw/master/ZKTreeTableView/Untitled.gif)
  
