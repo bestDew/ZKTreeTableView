@@ -157,7 +157,7 @@
         // 0.查找当前 section 下的 管理者
         ZKTreeManager *manager = nil;
         if (node == nil) { // 在根节点插入
-            manager = [self.managers lastObject];
+            manager = isTop ? [self.managers firstObject] : [self.managers lastObject];
         } else {
             for (ZKTreeManager *tempManager in self.managers) {
                 if ([tempManager getNodeByID:node.ID]) {
@@ -242,7 +242,7 @@
 - (void)registerClass:(nullable Class)cellClass forCellReuseIdentifier:(NSString *)identifier
 {
     BOOL flag = [cellClass isSubclassOfClass:[ZKTreeListViewCell class]];
-    NSAssert(flag, @"cellClass必须继承<ZKTreeListViewCell>");
+    NSAssert(flag, @"cellClass必须继承自<ZKTreeListViewCell>");
     
     [_tableView registerClass:cellClass forCellReuseIdentifier:identifier];
 }

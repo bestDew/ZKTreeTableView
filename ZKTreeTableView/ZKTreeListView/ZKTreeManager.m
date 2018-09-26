@@ -145,9 +145,6 @@ static NSString * const kTailIDPrefix = @"node_tail_";
 
 - (void)addTailForNode:(ZKTreeNode *)node
 {
-    // 没有子节点时不添加
-    if (node.childNodesCount <= 0) return;
-    
     // 已存在不添加
     ZKTreeNode *lastNode = [node.childNodes lastObject];
     if ([lastNode.ID hasPrefix:kTailIDPrefix]) return;
@@ -157,6 +154,8 @@ static NSString * const kTailIDPrefix = @"node_tail_";
     [_nodesMap setObject:tail forKey:tail.ID];
     [_allNodes addObject:tail];
     node.childNodesCount ++;
+    
+    if (node.level == _maxLevel) _maxLevel ++;
 }
 
 - (ZKTreeNode *)tailForNode:(ZKTreeNode *)node
