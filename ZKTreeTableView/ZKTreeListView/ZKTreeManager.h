@@ -44,8 +44,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-
-
 @class ZKTreeNode;
 
 @interface ZKTreeManager : NSObject
@@ -81,7 +79,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)new NS_UNAVAILABLE;
 
 /**
- 给父节点追加一组子节点
+ 给父节点增加一组子节点
  
  @param nodes 子节点数组
  @param node 父节点（若 node 为空，则追加在根节点）
@@ -110,7 +108,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (ZKTreeNode *)parentNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades;
 /** 获取 node 所有的子节点，包含子节点的子节点 */
 - (NSArray<ZKTreeNode *> *)getAllChildNodesWithNode:(ZKTreeNode *)node;
-/** 根据 ID 获取 node */
+/** 根据节点 ID 获取 节点 */
 - (ZKTreeNode *)getNodeByID:(NSString *)ID;
 
 @end

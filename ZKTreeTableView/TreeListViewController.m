@@ -166,7 +166,7 @@ static NSString *identifier = @"CommentsCell";
             [self showInputViewWithPlaceholder:@"我来说两句"];
             break;
         }
-        case 1: { // 查看评论
+        case 1: { // 刷新评论
             [_listView.tableView.mj_header beginRefreshing];
             break;
         }
