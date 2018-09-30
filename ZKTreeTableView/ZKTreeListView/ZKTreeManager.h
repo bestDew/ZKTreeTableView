@@ -44,6 +44,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+
+
 @class ZKTreeNode;
 
 @interface ZKTreeManager : NSObject
@@ -106,7 +108,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /** 向上查找相差 grades 个等级 的 node 的父节点 */
 - (ZKTreeNode *)parentNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades;
-/** 获取 node 所有的子节点，包含子节点的子节点和 node 本身 */
+/** 获取 node 所有的子节点，包含子节点的子节点 */
 - (NSArray<ZKTreeNode *> *)getAllChildNodesWithNode:(ZKTreeNode *)node;
 /** 根据 ID 获取 node */
 - (ZKTreeNode *)getNodeByID:(NSString *)ID;

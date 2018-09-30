@@ -236,6 +236,10 @@ static NSString * const kTailIDPrefix = @"node_tail_";
                 [self.showNodes insertObjects:tempManager.showNodes atIndexes:showIndexSet];
             } else {
                 node.expand = YES;
+                NSArray *allChildNodes = [self getAllChildNodesWithNode:node];
+                for (ZKTreeNode *childNode in allChildNodes) {
+                    childNode.expand = NO;
+                }
                 NSIndexSet *showIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(location, node.childNodes.count)];
                 [self.showNodes insertObjects:node.childNodes atIndexes:showIndexSet];
             }
@@ -399,6 +403,7 @@ static NSString * const kTailIDPrefix = @"node_tail_";
 {
     NSMutableArray *mutArray = [NSMutableArray array];
     [self addNode:node toMutableArray:mutArray flag:NO];
+    [mutArray removeObject:node];
     
     return mutArray;
 }
