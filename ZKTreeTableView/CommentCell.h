@@ -10,7 +10,7 @@
 
 typedef void (^ExpandBlock)(ZKTreeNode *node);
 
-@interface CommentsCell : ZKTreeListViewCell
+@interface CommentCell : ZKTreeListViewCell
 
 @property (nonatomic, copy) ExpandBlock block;
 

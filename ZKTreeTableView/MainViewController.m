@@ -30,7 +30,7 @@
     firstButton.layer.masksToBounds = YES;
     firstButton.layer.cornerRadius = 20.f;
     firstButton.tag = 10;
-    [firstButton setTitle:@"NoneStyle" forState:UIControlStateNormal];
+    [firstButton setTitle:@"NormalStyle" forState:UIControlStateNormal];
     [firstButton addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:firstButton];
     

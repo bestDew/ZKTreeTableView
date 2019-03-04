@@ -1,14 +1,14 @@
 //
-//  CommentsModel.m
+//  CommentModel.m
 //  ZKTreeTableView
 //
 //  Created by bestdew on 2018/8/29.
 //  Copyright © 2018年 bestdew. All rights reserved.
 //
 
-#import "CommentsModel.h"
+#import "CommentModel.h"
 
-@implementation CommentsModel
+@implementation CommentModel
 
 + (instancetype)modelWithDict:(NSDictionary *)dict
 {
@@ -28,6 +28,5 @@
 {
     if ([key isEqualToString:@"id"]) _ID = value;
 }
-
 
 @end

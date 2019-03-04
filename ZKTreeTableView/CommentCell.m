@@ -6,10 +6,10 @@
 //  Copyright © 2018年 bestdew. All rights reserved.
 //
 
-#import "CommentsCell.h"
-#import "CommentsModel.h"
+#import "CommentCell.h"
+#import "CommentModel.h"
 
-@interface CommentsCell ()
+@interface CommentCell ()
 
 @property (nonatomic, strong) UIImageView *imgView;
 @property (nonatomic, strong) UILabel *nickNameLabel;
@@ -18,7 +18,7 @@
 
 @end
 
-@implementation CommentsCell
+@implementation CommentCell
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
@@ -44,21 +44,24 @@
 {
     [super layoutSubviews];
     
-    CGFloat imgX = 0.f, imgSize = 0.f;
+    CGFloat imgX = 0.f, imgY = 0.f, imgSize = 0.f;
     if (self.node.level == 0) {
         imgX = 16.f;
+        imgY = 18.f;
         imgSize = 40.f;
     } else if (self.node.level == 1) {
         imgX = 12.f;
+        imgY = 12.f;
         imgSize = 24.f;
     } else {
         imgX = 8.f;
+        imgY = 12.f;
         imgSize = 24.f;
     }
     
-    _imgView.frame = CGRectMake(imgX, 16.f, imgSize, imgSize);
+    _imgView.frame = CGRectMake(imgX, imgY, imgSize, imgSize);
     _imgView.layer.cornerRadius = imgSize / 2;
-    _nickNameLabel.frame = CGRectMake(imgX + imgSize + 12.f, 20.f, self.view.frame.size.width - imgX - imgSize - 50.f, 20.f);
+    _nickNameLabel.frame = CGRectMake(imgX + imgSize + 12.f, imgY, self.view.frame.size.width - imgX - imgSize - 50.f, 24.f);
     _expandButton.frame = CGRectMake(CGRectGetMaxX(_nickNameLabel.frame) + 2.f, _nickNameLabel.frame.origin.y, 20.f, 20.f);
     _contentLabel.frame = CGRectMake(imgX + imgSize + 4.f, CGRectGetMaxY(_nickNameLabel.frame) + 4.f, self.view.frame.size.width - imgX - imgSize - 20.f, self.view.frame.size.height - CGRectGetMaxY(_nickNameLabel.frame) - 4.f);
     _contentLabel.layer.cornerRadius = 8.f;
@@ -68,13 +71,13 @@
 {
     [super setNode:node]; // 必须调用父类方法
     
-    CommentsModel *model = (CommentsModel *)node.data;
+    CommentModel *model = (CommentModel *)node.data;
     
-    self.nickNameLabel.text = model.nick_name;
-    self.expandButton.selected = node.isExpand;
-    self.expandButton.hidden = (node.childNodes.count == 0);
-    self.imgView.image = [UIImage imageNamed:model.image_name];
-    self.contentLabel.attributedText = [self attributedTextWithString:model.content];
+    _nickNameLabel.text = model.nick_name;
+    _expandButton.selected = node.isExpand;
+    _expandButton.hidden = (node.childNodes.count == 0);
+    _imgView.image = [UIImage imageNamed:model.image_name];
+    _contentLabel.attributedText = [self attributedTextWithString:model.content];
 }
 
 - (NSAttributedString *)attributedTextWithString:(NSString *)string

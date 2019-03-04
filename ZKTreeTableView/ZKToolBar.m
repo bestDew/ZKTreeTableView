@@ -73,20 +73,20 @@
     [self addSubview:inputButton];
     
     UIButton *viewcButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    viewcButton.frame = CGRectMake(CGRectGetMaxX(inputButton.frame) + 24.f, 13.f, 24.f, 21.f);
+    viewcButton.frame = CGRectMake(CGRectGetMaxX(inputButton.frame) + 20.f, 13.f, 24.f, 21.f);
     viewcButton.tag = 201;
     [viewcButton setImage:[UIImage imageNamed:@"ic_comment_new"] forState:UIControlStateNormal];
     [viewcButton addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:viewcButton];
     
     UIButton *shareButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    shareButton.frame = CGRectMake(CGRectGetMaxX(viewcButton.frame) + 20.f, 12.f, 21.f, 22.f);
+    shareButton.frame = CGRectMake(CGRectGetMaxX(viewcButton.frame) + 25.f, 10.f, 25.f, 25.f);
     shareButton.tag = 202;
-    [shareButton setImage:[UIImage imageNamed:@"ic_share"] forState:UIControlStateNormal];
+    [shareButton setImage:[UIImage imageNamed:@"share_normal"] forState:UIControlStateNormal];
     [shareButton addTarget:self action:@selector(buttonAction:) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:shareButton];
     
-    UILabel *brigeLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(viewcButton.frame) - 8.f, viewcButton.frame.origin.y - 5.f, 15.f, 13.f)];
+    UILabel *brigeLabel = [[UILabel alloc] initWithFrame:CGRectMake(CGRectGetMaxX(viewcButton.frame) - 10.f, viewcButton.frame.origin.y - 4.f, 15.f, 13.f)];
     brigeLabel.font = [UIFont systemFontOfSize:9.f];
     brigeLabel.textColor = [UIColor whiteColor];
     brigeLabel.hidden = YES;
@@ -96,6 +96,11 @@
     brigeLabel.layer.cornerRadius = 2.f;
     [self addSubview:brigeLabel];
     _brigeLabel = brigeLabel;
+}
+
+- (void)dealloc
+{
+    NSLog(@"%s", __func__);
 }
 
 @end

@@ -49,11 +49,23 @@
 @property (nonatomic, readonly, strong) UIView *view;
 /** 子类中重写 -setNode: 方法，通过 node.data 进行赋值处理 */
 @property (nonatomic, strong) ZKTreeNode *node;
+/** 是否显示结构线 */
+@property (nonatomic, assign) BOOL showStructureLine;
 
 @end
 
-@interface ZKTailCell : ZKTreeListViewCell
+typedef NS_ENUM(NSInteger, ZKTreeTailCellState) {
+    ZKTreeTailCellStateIdle,     // 闲置状态
+    ZKTreeTailCellStateLoading,  // 加载中...
+    ZKTreeTailCellStateLoadError // 加载失败
+};
 
-@property (nonatomic, assign, getter=isLoading) BOOL loading;
+@interface ZKTreeTailCell : ZKTreeListViewCell
+
+/** 当前状态 */
+@property (nonatomic, assign) ZKTreeTailCellState state;
+
+/** 设置响应状态下的文字 */
+- (void)setText:(NSString *)text forState:(ZKTreeTailCellState)state;
 
 @end

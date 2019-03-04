@@ -44,6 +44,8 @@
 
 @import CoreGraphics.CGBase;
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ZKTreeNode : NSObject
 
 @property (nonatomic, readonly, copy) NSString *ID;        // 节点唯一标识
@@ -58,19 +60,19 @@
 @property (nonatomic, assign) NSInteger childNodesCount;    // 子节点总数（用于分页）
 @property (nonatomic, assign) NSInteger pageIndex;          // 分页页码（默认为1）
 
-@property (nonatomic, weak)   ZKTreeNode *parentNode; // 父节点
-@property (nonatomic, strong) NSMutableArray<ZKTreeNode *> *childNodes; // 子节点数组
+@property (nullable, nonatomic, weak)   ZKTreeNode *parentNode; // 父节点
+@property (nullable, nonatomic, strong) NSMutableArray<ZKTreeNode *> *childNodes; // 子节点数组
 
 /** 快捷初始化 */
 - (instancetype)initWithID:(NSString *)ID
                   parentID:(NSString *)pID
                  sortOrder:(NSInteger)order
-                      data:(id)data;
+                      data:(nullable id)data;
 
 + (instancetype)nodeWithID:(NSString *)ID
                   parentID:(NSString *)pID
                  sortOrder:(NSInteger)order
-                      data:(id)data;
+                      data:(nullable id)data;
 
 - (instancetype)init NS_UNAVAILABLE;
 + (instancetype)new NS_UNAVAILABLE;
@@ -80,3 +82,7 @@
 - (BOOL)isTail;
 
 @end
+
+FOUNDATION_EXTERN NSString * const kTailIDPrefix;
+
+NS_ASSUME_NONNULL_END

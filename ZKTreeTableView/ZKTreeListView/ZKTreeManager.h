@@ -41,10 +41,9 @@
 //                   $               $
 
 #import <Foundation/Foundation.h>
+#import "ZKTreeNode.h"
 
 NS_ASSUME_NONNULL_BEGIN
-
-@class ZKTreeNode;
 
 @interface ZKTreeManager : NSObject
 
@@ -95,7 +94,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSInteger)expandNode:(ZKTreeNode *)node expand:(BOOL)isExpand;
 /**
  展开/折叠到多少层级
-
+ 
  @param expandLevel 等级
  @param noExpandCompleted 返回折叠所改变的所有节点
  @param expandCompleted 返回展开所改变的所有节点
@@ -105,11 +104,11 @@ NS_ASSUME_NONNULL_BEGIN
                 expandCompleted:(void(^)(NSArray<ZKTreeNode *> *expandArray))expandCompleted;
 
 /** 向上查找相差 grades 个等级 的 node 的父节点 */
-- (ZKTreeNode *)parentNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades;
+- (nullable ZKTreeNode *)parentNodeWithNode:(ZKTreeNode *)node grades:(NSInteger)grades;
 /** 获取 node 所有的子节点，包含子节点的子节点 */
-- (NSArray<ZKTreeNode *> *)getAllChildNodesWithNode:(ZKTreeNode *)node;
+- (NSArray<ZKTreeNode *> *)childNodesForNode:(ZKTreeNode *)node;
 /** 根据节点 ID 获取 节点 */
-- (ZKTreeNode *)getNodeByID:(NSString *)ID;
+- (nullable ZKTreeNode *)nodeForID:(NSString *)ID;
 
 @end
 

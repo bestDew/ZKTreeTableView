@@ -43,6 +43,7 @@
 #import "ZKTreeListViewCell.h"
 
 @interface ZKLayer : CALayer
+
 @end
 
 @implementation ZKLayer
@@ -59,13 +60,16 @@
 
 @interface ZKTreeListViewCell ()
 
-@property (nonatomic, assign) BOOL showStructureLine;
 @property (nonatomic, strong) CALayer *horizontalLine;
 @property (nonatomic, strong) CALayer *verticalLine;
 
 @end
 
 @implementation ZKTreeListViewCell
+
+CG_INLINE CGFloat CGFloatFromPixel(CGFloat value) {
+    return value / UIScreen.mainScreen.scale;
+}
 
 #pragma mark -- 初始化
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
@@ -89,15 +93,15 @@
     CGFloat maxWidth  = self.contentView.frame.size.width;
     CGFloat maxHeight = self.contentView.frame.size.height;
     
-    CGFloat x = 0.f, horLineWidth = 0.f, verLineX = 36.f, verLineY = 40.f;
+    CGFloat x = 0.f, horLineWidth = 0.f, verLineX = 36.f, verLineY = 36.f;
     
     // 禁用隐式动画
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
     
-    if (_showStructureLine) {
+    if (self.showStructureLine) {
         if (_node.level == 0) {
-            verLineY = 56.f;
+            verLineY = 58.f;
         } else if (_node.level == 1) {
             x = 36.f;
             horLineWidth = 12.f;
@@ -107,10 +111,10 @@
             horLineWidth = 8.f;
             verLineX = 20.f;
         }
-        CGFloat horizontalLineY = 28.f - _node.isTail * 6.f;
-        _horizontalLine.frame = CGRectMake(0, horizontalLineY, horLineWidth, 1.f);
+        CGFloat horizontalLineY = 24.f - _node.isTail * 2.f;
+        _horizontalLine.frame = CGRectMake(0, horizontalLineY, horLineWidth, CGFloatFromPixel(1.f));
         
-        CGFloat verLineWidth = (_node.childNodes.count > 0 && _node.isExpand) ? 1.f : 0.f;
+        CGFloat verLineWidth = (_node.childNodes.count > 0 && _node.isExpand) ? CGFloatFromPixel(1.f) : 0.f;
         _verticalLine.frame = CGRectMake(verLineX, verLineY, verLineWidth, maxHeight - verLineY);
     } else {
         x = 30.f * _node.level;
@@ -126,7 +130,7 @@
     // 移除之前的结构线
     [self removeAllLineLayers];
     
-    if (!_showStructureLine) return;
+    if (!self.showStructureLine) return;
     
     // 由 node 的父节点递归到根节点，寻找当前等级下的叶节点并保存
     NSMutableArray<NSNumber *> *mutArray = @[].mutableCopy;
@@ -150,11 +154,11 @@
         // 判断 node 是否为叶节点
         NSArray<ZKTreeNode *> *nodes = _node.parentNode.childNodes;
         if ((nodes.lastObject == _node) && i == _node.level - 1) {
-            lineHeight = 28.f - _node.isTail * 6.f;
+            lineHeight = 24.f - _node.isTail * 2.f;
         }
         // 绘制结构线
         ZKLayer *otherLine = [ZKLayer layer];
-        otherLine.frame = CGRectMake(lineX, 0.f, 1.0, lineHeight);
+        otherLine.frame = CGRectMake(lineX, 0.f, CGFloatFromPixel(1.f), lineHeight);
         [self.contentView.layer addSublayer:otherLine];
     }
 }
@@ -236,21 +240,30 @@
 
 @end
 
-@interface ZKTailCell ()
+@interface ZKTreeTailCell ()
 
+@property (nonatomic, strong) UIView *baseView;
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UIActivityIndicatorView *indicatorView;
+@property (nonatomic, copy) NSString *idleStateText;
+@property (nonatomic, copy) NSString *loadingStateText;
+@property (nonatomic, copy) NSString *loadErrorStateText;
 
 @end
 
-@implementation ZKTailCell
+@implementation ZKTreeTailCell
 
 - (instancetype)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
         
-        [self.view addSubview:self.titleLabel];
-        [self.view addSubview:self.indicatorView];
+        _idleStateText = @"点击加载更多";
+        _loadingStateText = @"加载中...";
+        _loadErrorStateText = @"加载失败，点击重试";
+        
+        [self.view addSubview:self.baseView];
+        [self.baseView addSubview:self.titleLabel];
+        [self.baseView addSubview:self.indicatorView];
     }
     return self;
 }
@@ -259,10 +272,69 @@
 {
     [super layoutSubviews];
     
-    CGFloat titleLabelX = (self.node.level == 1) ? 12.f : 8.f;
-    CGFloat titleLabelY = (self.showStructureLine) ? 12.f : 5.f;
-    _titleLabel.frame = CGRectMake(titleLabelX, titleLabelY, self.view.frame.size.width - titleLabelX - 16.f, 24.f);
-    _indicatorView.center = _titleLabel.center;
+    CGFloat baseViewX = (self.node.level == 1) ? 12.f : 8.f;
+    CGFloat baseViewY = (self.showStructureLine) ? 12.f : 5.f;
+    CGFloat baseViewW = self.view.frame.size.width - baseViewX - 16.f;
+    _baseView.frame = CGRectMake(baseViewX, baseViewY, baseViewW, 24.f);
+    
+    CGFloat titleLabelW = [_titleLabel sizeThatFits:CGSizeMake(baseViewW - 40.f, 24.f)].width;
+    CGFloat indicatorViewX = (baseViewW - titleLabelW - 24.f) * 0.5;
+    _indicatorView.frame = CGRectMake(indicatorViewX, 4.f, 16.f, 16.f);
+    
+    CGFloat titleLabelX = indicatorViewX + 24.f;
+    _titleLabel.frame = CGRectMake(titleLabelX, 0, titleLabelW, 24.f);
+}
+
+- (void)setState:(ZKTreeTailCellState)state
+{
+    if (state == _state) return;
+    
+    _state = state;
+    
+    switch (state) {
+        case ZKTreeTailCellStateIdle:
+            _titleLabel.text = _idleStateText;
+            [_indicatorView stopAnimating];
+            break;
+        case ZKTreeTailCellStateLoading:
+            _titleLabel.text = _loadingStateText;
+            [_indicatorView startAnimating];
+            break;
+        case ZKTreeTailCellStateLoadError:
+            _titleLabel.text = _loadErrorStateText;
+            [_indicatorView stopAnimating];
+            break;
+    }
+    [self setNeedsLayout];
+    [self layoutIfNeeded];
+}
+
+- (void)setText:(NSString *)text forState:(ZKTreeTailCellState)state
+{
+    switch (state) {
+        case ZKTreeTailCellStateIdle:
+            _idleStateText = text;
+            break;
+        case ZKTreeTailCellStateLoading:
+            _loadingStateText = text;
+            break;
+        case ZKTreeTailCellStateLoadError:
+            _loadErrorStateText = text;
+            break;
+    }
+    if (_state == state) _titleLabel.text = text;
+}
+
+- (UIView *)baseView
+{
+    if (_baseView == nil) {
+        
+        _baseView = [[UIView alloc] init];
+        _baseView.backgroundColor = [UIColor colorWithRed:0.94 green:0.95 blue:0.95 alpha:1.00];
+        _baseView.layer.masksToBounds = YES;
+        _baseView.layer.cornerRadius = 8.f;
+    }
+    return _baseView;
 }
 
 - (UILabel *)titleLabel
@@ -271,12 +343,8 @@
         
         _titleLabel = [[UILabel alloc] init];
         _titleLabel.font = [UIFont systemFontOfSize:12.f];
-        _titleLabel.textAlignment = NSTextAlignmentCenter;
         _titleLabel.textColor = [UIColor colorWithRed:0.53 green:0.54 blue:0.55 alpha:1.00];
-        _titleLabel.layer.backgroundColor = [UIColor colorWithRed:0.94 green:0.95 blue:0.95 alpha:1.00].CGColor;
-        _titleLabel.text = @"点击加载更多";
-        _titleLabel.layer.masksToBounds = YES;
-        _titleLabel.layer.cornerRadius = 8.f;
+        _titleLabel.text = _idleStateText;
     }
     return _titleLabel;
 }
@@ -287,21 +355,9 @@
         
         _indicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
         _indicatorView.hidesWhenStopped = YES;
+        _indicatorView.transform = CGAffineTransformMakeScale(0.8, 0.8);
     }
     return _indicatorView;
-}
-
-- (void)setLoading:(BOOL)loading
-{
-    _loading = loading;
-    
-    if (loading) {
-        _titleLabel.text = nil;
-        [_indicatorView startAnimating];
-    } else {
-        _titleLabel.text = @"点击加载更多";
-        [_indicatorView stopAnimating];
-    }
 }
 
 @end

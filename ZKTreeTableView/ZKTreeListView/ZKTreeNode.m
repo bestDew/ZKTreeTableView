@@ -42,9 +42,11 @@
 
 #import "ZKTreeNode.h"
 
+NSString * const kTailIDPrefix = @"node_tail_";
+
 @implementation ZKTreeNode
 
-- (instancetype)initWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(id)data
+- (instancetype)initWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(nullable id)data
 {
     if (self = [super init]) {
         
@@ -63,7 +65,7 @@
     return self;
 }
 
-+ (instancetype)nodeWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(id)data
++ (instancetype)nodeWithID:(NSString *)ID parentID:(NSString *)pID sortOrder:(NSInteger)order data:(nullable id)data
 {
     return [[self alloc] initWithID:ID parentID:pID sortOrder:order data:data];
 }
@@ -86,7 +88,7 @@
 
 - (BOOL)isTail
 {
-    return [self.ID hasPrefix:@"node_tail_"];
+    return [self.ID hasPrefix:kTailIDPrefix];
 }
 
 - (void)setLevel:(NSInteger)level

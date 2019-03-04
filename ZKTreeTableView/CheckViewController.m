@@ -8,7 +8,7 @@
 
 #import "CheckViewController.h"
 #import "CheckCell.h"
-#import "CommentsModel.h"
+#import "CommentModel.h"
 #import "ZKTreeListView.h"
 #import "YYFPSLabel.h"
 #import "RequestHepler.h"
@@ -52,7 +52,7 @@ static NSString *identifier = @"CheckCell";
         NSMutableArray *nodes = [NSMutableArray arrayWithCapacity:dataArray.count];
         for (NSDictionary *dataDict in dataArray) {
             // 1.字典转模型
-            CommentsModel *model = [CommentsModel modelWithDict:dataDict];
+            CommentModel *model = [CommentModel modelWithDict:dataDict];
             // 2.创建 node
             NSInteger sortOrder = [model.order_no integerValue];
             CheckNode *node = [CheckNode nodeWithID:model.ID
@@ -144,9 +144,10 @@ static NSString *identifier = @"CheckCell";
     __weak typeof(self) weakSelf = self;
     CheckCell *cell = [listView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
     cell.block = ^(ZKTreeNode *node, BOOL isCheck) {
+        __strong typeof(weakSelf) strongSelf = weakSelf;
         NSMutableArray<CheckNode *> *mutArray = [NSMutableArray array];
-        [weakSelf checkNode:(CheckNode *)node withCheck:isCheck mutableArray:mutArray];
-        [weakSelf.listView reloadNodes:mutArray];
+        [strongSelf checkNode:(CheckNode *)node withCheck:isCheck mutableArray:mutArray];
+        [strongSelf.listView reloadNodes:mutArray];
     };
     return cell;
 }
@@ -155,8 +156,9 @@ static NSString *identifier = @"CheckCell";
 - (ZKTreeListView *)listView
 {
     if (_listView == nil) {
-        _listView = [[ZKTreeListView alloc] initWithFrame:self.view.bounds style:ZKTreeListViewStyleNone];
+        _listView = [[ZKTreeListView alloc] initWithFrame:self.view.bounds style:ZKTreeListViewStyleNormal];
         _listView.delegate = self;
+        _listView.tableView.separatorStyle = UITableViewCellSeparatorStyleSingleLine;
         _listView.tableView.tableFooterView = [UIView new];
         [_listView registerClass:[CheckCell class] forCellReuseIdentifier:identifier];
     }

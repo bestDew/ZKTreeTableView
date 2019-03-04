@@ -48,7 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ZKTreeListView;
 
 typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
-    ZKTreeListViewStyleNone,          // 默认
+    ZKTreeListViewStyleNormal,        // 默认
     ZKTreeListViewStyleStructureLine, // 带有结构线
 };
 
@@ -86,9 +86,9 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 /** 代理 */
 @property (nonatomic, weak) id<ZKTreeListViewDelegate> delegate;
 /** 当点击 cell 的时候是否自动展开/折叠（默认为YES） */
-@property (nonatomic, assign, getter=isAutoExpand) BOOL autoExpand;
+@property (nonatomic, assign) BOOL autoExpand;
 /** 是否显示折叠动画（默认为YES） */
-@property (nonatomic, assign, getter=isShowAnimation) BOOL showAnimation;
+@property (nonatomic, assign) BOOL showAnimation;
 /** 内部 tableView，请勿设置其代理 */
 @property (nonatomic, readonly, strong) UITableView *tableView;
 
@@ -104,14 +104,14 @@ typedef NS_ENUM(NSInteger, ZKTreeListViewStyle) {
 - (void)appendRootNodes:(NSArray<ZKTreeNode *> *)nodes;
 /**
  在 node 子节点的末尾追加子节点
-
+ 
  @param nodes 需要添加的节点数组
  @param node 需要添加子节点的目标节点，当 node == nil 时，添加根节点，但不会创建新的分组，在根节点追加数据时，建议使用 -appendNodes：
  @param isTop 若为 YES，则在 头部添加，若为 NO，则在末尾添加
  */
 - (void)addChildNodes:(NSArray<ZKTreeNode *> *)nodes
-                 forNode:(nullable ZKTreeNode *)node
-             placedAtTop:(BOOL)isTop;
+              forNode:(nullable ZKTreeNode *)node
+          placedAtTop:(BOOL)isTop;
 /** 删除一个节点（包含子节点） */
 - (void)deleteNode:(ZKTreeNode *)node;
 

@@ -7,7 +7,7 @@
 //
 
 #import "CheckCell.h"
-#import "CommentsModel.h"
+#import "CommentModel.h"
 #import "CheckNode.h"
 
 @interface CheckCell ()
@@ -92,7 +92,7 @@
     CheckNode *checkNode = (CheckNode *)node;
     _checkButton.selected = checkNode.isChecked;
     
-    CommentsModel *model = (CommentsModel *)node.data;
+    CommentModel *model = (CommentModel *)node.data;
     _titleLabel.text = model.nick_name;
     
     _arrowImgView.hidden = (node.childNodes.count <= 0);

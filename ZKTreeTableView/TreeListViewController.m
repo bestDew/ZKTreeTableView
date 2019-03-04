@@ -7,8 +7,8 @@
 //
 
 #import "TreeListViewController.h"
-#import "CommentsCell.h"
-#import "CommentsModel.h"
+#import "CommentCell.h"
+#import "CommentModel.h"
 #import "YYFPSLabel.h"
 #import <MJRefresh.h>
 #import "ZKTreeListView.h"
@@ -31,7 +31,8 @@
 
 @end
 
-static NSString *identifier = @"CommentsCell";
+static NSString *kCellReuseId = @"CommentCell";
+static NSString *kTailCellReuseId = @"ZKTreeTailCell";
 
 @implementation TreeListViewController
 
@@ -79,7 +80,7 @@ static NSString *identifier = @"CommentsCell";
     }];
 }
 
-- (void)requestChildNodesDataWithNode:(ZKTreeNode *)node cell:(ZKTailCell *)cell
+- (void)requestChildNodesDataWithNode:(ZKTreeNode *)node cell:(ZKTreeTailCell *)cell
 {
     NSDictionary *params = @{@"pid":node.parentID,
                              @"level":@(node.level),
@@ -87,9 +88,10 @@ static NSString *identifier = @"CommentsCell";
     [RequestHepler mackRequestMoreChildNodeDataWithParams:params success:^(id response) {
         ZKTreeNode *addNode = [self nodeForDictionary:response];
         [_listView addChildNodes:@[addNode] forNode:node.parentNode placedAtTop:NO];
-        cell.loading = NO;
+        cell.state = ZKTreeTailCellStateIdle;
     } failure:^(NSError *error) {
-        NSLog(@"请求出错：%@", error);
+        node.parentNode.pageIndex --;
+        cell.state = ZKTreeTailCellStateLoadError;
     }];
 }
 
@@ -126,15 +128,14 @@ static NSString *identifier = @"CommentsCell";
 {
     NSLog(@"节点ID = %@", node.ID);
     if (node.isTail) {
-        ZKTailCell *cell = [listView cellForRowAtIndexPath:indexPath];
-        if (cell.isLoading) return;
-        // 模拟子节点加载更多
-        cell.loading = YES;
-        node.pageIndex ++;
+        ZKTreeTailCell *cell = [listView cellForRowAtIndexPath:indexPath];
+        if (cell.state == ZKTreeTailCellStateLoading) return;
+        node.parentNode.pageIndex ++;
+        cell.state = ZKTreeTailCellStateLoading;
         [self requestChildNodesDataWithNode:node cell:cell];
     } else {
         _targetNode = node;
-        CommentsModel *model = (CommentsModel *)node.data;
+        CommentModel *model = (CommentModel *)node.data;
         NSString *placeholder = [NSString stringWithFormat:@"回复  %@", model.nick_name];
         [self showInputViewWithPlaceholder:placeholder];
     }
@@ -149,12 +150,18 @@ static NSString *identifier = @"CommentsCell";
 
 - (ZKTreeListViewCell *)treeListView:(ZKTreeListView *)listView cellForNode:(ZKTreeNode *)node atIndexPath:(NSIndexPath *)indexPath
 {
-    __weak typeof(self) weakSelf = self;
-    CommentsCell *cell = [listView dequeueReusableCellWithIdentifier:identifier forIndexPath:indexPath];
-    cell.block = ^(ZKTreeNode *node) {
-        [weakSelf.listView expandNodes:@[node] withExpand:!node.isExpand];
-    };
-    return cell;
+    if (node.isTail) {
+        ZKTreeTailCell *cell = [listView dequeueReusableCellWithIdentifier:kTailCellReuseId forIndexPath:indexPath];
+        return cell;
+    } else {
+        __weak typeof(self) weakSelf = self;
+        CommentCell *cell = [listView dequeueReusableCellWithIdentifier:kCellReuseId forIndexPath:indexPath];
+        cell.block = ^(ZKTreeNode *node) {
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf.listView expandNodes:@[node] withExpand:!node.isExpand];
+        };
+        return cell;
+    }
 }
 
 #pragma mark -- ZKToolBar Delgate
@@ -214,7 +221,7 @@ static NSString *identifier = @"CommentsCell";
 - (ZKTreeNode *)nodeForDictionary:(NSDictionary *)dict
 {
     // 1.字典转模型
-    CommentsModel *model = [CommentsModel modelWithDict:dict];
+    CommentModel *model = [CommentModel modelWithDict:dict];
     // 2.计算 cell 行高
     NSInteger level = [model.level integerValue];
     CGFloat rowHeight = [self nodeHeightWithLevel:level content:model.content];
@@ -249,16 +256,19 @@ static NSString *identifier = @"CommentsCell";
         _listView.showAnimation = NO;
         _listView.defaultExpandLevel = 2;
         _listView.tableView.tableFooterView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width, 16.f)];
-        [_listView registerClass:[CommentsCell class] forCellReuseIdentifier:identifier];
+        [_listView registerClass:[CommentCell class] forCellReuseIdentifier:kCellReuseId];
+        [_listView registerClass:[ZKTreeTailCell class] forCellReuseIdentifier:kTailCellReuseId];
         
         __weak typeof(self) weakSelf = self;
         _listView.tableView.mj_header = [MJRefreshNormalHeader headerWithRefreshingBlock:^{
-            weakSelf.pageIndex = 1;
-            [weakSelf requestNodesData];
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.pageIndex = 1;
+            [strongSelf requestNodesData];
         }];
         _listView.tableView.mj_footer = [MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
-            weakSelf.pageIndex ++;
-            [weakSelf requestNodesData];
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            strongSelf.pageIndex ++;
+            [strongSelf requestNodesData];
         }];
     }
     return _listView;

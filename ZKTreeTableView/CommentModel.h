@@ -1,5 +1,5 @@
 //
-//  CommentsModel.h
+//  CommentModel.h
 //  ZKTreeTableView
 //
 //  Created by bestdew on 2018/8/29.
@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface CommentsModel : NSObject
+@interface CommentModel : NSObject
 
 @property (nonatomic, readonly, copy)   NSString *ID;           // 节点ID
 @property (nonatomic, readonly, copy)   NSString *pid;          // 父节点ID
