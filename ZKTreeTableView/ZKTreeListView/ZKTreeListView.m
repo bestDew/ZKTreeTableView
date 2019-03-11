@@ -214,9 +214,11 @@
     for (ZKTreeManager *manager in self.managers) {
         NSInteger section = [self.managers indexOfObject:manager];
         [manager expandAllNodesWithLevel:expandLevel noExpandCompleted:^(NSArray<ZKTreeNode *> * _Nonnull noExpandArray) {
-            [weakSelf tableView:weakSelf.tableView didSelectNodes:noExpandArray withSection:section expand:NO];
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf tableView:strongSelf.tableView didSelectNodes:noExpandArray withSection:section expand:NO];
         } expandCompleted:^(NSArray<ZKTreeNode *> * _Nonnull expandArray) {
-            [weakSelf tableView:weakSelf.tableView didSelectNodes:expandArray withSection:section expand:YES];
+            __strong typeof(weakSelf) strongSelf = weakSelf;
+            [strongSelf tableView:strongSelf.tableView didSelectNodes:expandArray withSection:section expand:YES];
         }];
     }
 }
