@@ -103,18 +103,17 @@
 
 - (void)appendRootNodes:(NSArray<ZKTreeNode *> *)nodes
 {
-    // 1.数据去重
-    NSMutableArray *mutNodes = nodes.mutableCopy;
-    for (ZKTreeManager *tempManager in self.managers) {
-        for (ZKTreeNode *tempNode in tempManager.allNodes) {
-            if ([nodes containsObject:tempNode]) {
-                [mutNodes removeObject:tempNode];
-            }
-        }
-    }
-    
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+        // 1.数据去重
+        NSMutableArray *mutNodes = nodes.mutableCopy;
+        for (ZKTreeManager *tempManager in self.managers) {
+            for (ZKTreeNode *tempNode in tempManager.allNodes) {
+                if ([nodes containsObject:tempNode]) {
+                    [mutNodes removeObject:tempNode];
+                }
+            }
+        }
         // 2.构建管理者
         ZKTreeManager *manager = [[ZKTreeManager alloc] initWithNodes:mutNodes minLevel:0 expandLevel:_defaultExpandLevel];
         // 3.拼接节点
@@ -150,9 +149,9 @@
 
 - (void)addChildNodes:(NSArray<ZKTreeNode *> *)nodes forNode:(nullable ZKTreeNode *)node placedAtTop:(BOOL)isTop
 {
-    NSMutableArray *mutNodes = nodes.mutableCopy;
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         dispatch_semaphore_wait(_lock, DISPATCH_TIME_FOREVER);
+        NSMutableArray *mutNodes = nodes.mutableCopy;
         // 0.查找当前 section 下的 管理者
         ZKTreeManager *manager = nil;
         if (node == nil) { // 在根节点插入
