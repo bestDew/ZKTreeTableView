@@ -1,6 +1,6 @@
 # ZKTreeListView
 
-## 运用二叉树思想封装的树状结构列表框架
+## 运用二叉树思想封装的树状结构列表
 
  ![](https://github.com/bestDew/ZKTreeTableView/raw/master/ZKTreeTableView/Untitled.gif)
  
@@ -59,20 +59,10 @@
  
  详细使用参见Demo，注释写得很清楚。
  
- ## 性能
- 
- 考虑到autoLayout在cell的子控件较多时的性能不足，本框架采用最原始的frame布局😂，简单测了下，基本满帧运行
- 
 ## 不足
 
  由于树状结构列表使用范围较窄，并且与业务耦合严重，所以框架目前的可定制化程度不高。如果本框架不能满足项目需求，可将 ZKTreeNode 和 ZKTreeManager 单独抽离使用，自己去实现视图类。
  
-## Futures
-
-1.提升可定制化程度；<br/>
-2.自适应行高；<br/>
-3.简化使用。
-
 ## 感谢
 
-如果本框架对你有帮助，烦劳给颗星，谢谢😘
+如果对你有帮助，烦劳给颗星，谢谢😘
