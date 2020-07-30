@@ -18,7 +18,7 @@
  
  * ZKTreeListViewCell：cell视图类。自定义cell时需继承此类
  
- * ZKTreeListView：主视图类。用于将数据操作可视化（线程安全）
+ * ZKTreeListView：主视图类。用于将数据操作可视化
  
  ## 代码示例
 
